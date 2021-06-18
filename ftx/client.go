@@ -27,6 +27,11 @@ type Client struct {
 	Subaccount string
 }
 
+func NewClient(cl *http.Client, key, secret, sub string) *Client {
+	c := &Client{cl, key, []byte(secret), sub}
+	return c
+}
+
 func processResponse(resp *http.Response, result interface{}) error {
 	defer resp.Body.Close()
 	body, err := ioutil.ReadAll(resp.Body)

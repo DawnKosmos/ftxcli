@@ -74,24 +74,83 @@ type NewOrder struct {
 	// ClientID                string  `json:"clientId"`
 }
 
-func (f *Client) SetOrder(ticker string, side string, price, size float64, ordertype string, reduceOnly bool) (NewOrderResponse, error) {
+type NewTriggerOrder struct {
+	Market       string  `json:"market"`
+	Side         string  `json:"side"`
+	Size         float64 `json:"size"`
+	Type         string  `json:"type"`
+	ReduceOnly   bool    `json:"reduceOnly"`
+	TriggerPrice float64 `json:"triggerPrice"`
+}
+
+func (f *Client) SetOrder(ticker string, side string, price, size float64, orderType string, reduceOnly bool) (NewOrderResponse, error) {
 	var newOrderResponse NewOrderResponse
 	requestBody, err := json.Marshal(NewOrder{
 		Market:     ticker,
 		Side:       side,
 		Price:      price,
-		Type:       ordertype,
+		Type:       orderType,
 		Size:       size,
 		ReduceOnly: reduceOnly,
 		Ioc:        false,
 		PostOnly:   reduceOnly})
 	if err != nil {
-		log.Printf("Error PlaceOrder", err)
+		log.Printf("Error PlaceOrder %v", err)
 		return newOrderResponse, err
 	}
 	resp, err := f.post("orders", requestBody)
 	if err != nil {
-		log.Printf("Error PlaceOrder", err)
+		log.Printf("Error PlaceOrder %v", err)
+		return newOrderResponse, err
+	}
+	err = processResponse(resp, &newOrderResponse)
+	return newOrderResponse, err
+}
+
+type NewTriggerOrderResponse struct {
+	Success bool         `json:"success"`
+	Result  TriggerOrder `json:"result"`
+}
+
+type TriggerOrder struct {
+	CreatedAt    time.Time `json:"createdAt"`
+	Error        string    `json:"error"`
+	Future       string    `json:"future"`
+	ID           int64     `json:"id"`
+	Market       string    `json:"market"`
+	OrderID      int64     `json:"orderId"`
+	OrderPrice   float64   `json:"orderPrice"`
+	ReduceOnly   bool      `json:"reduceOnly"`
+	Side         string    `json:"side"`
+	Size         float64   `json:"size"`
+	TrailStart   float64   `json:"trailStart"`
+	TrailValue   float64   `json:"trailValue"`
+	TriggerPrice float64   `json:"triggerPrice"`
+	TriggeredAt  string    `json:"triggeredAt"`
+	Type         string    `json:"type"`
+	OrderType    string    `json:"orderType"`
+	FilledSize   float64   `json:"filledSize"`
+	AvgFillPrice float64   `json:"avgFillPrice"`
+	OrderStatus  string    `json:"orderStatus"`
+}
+
+func (f *Client) SetTriggerOrder(ticker string, side string, price, size float64, orderType string, reduceOnly bool) (NewTriggerOrderResponse, error) {
+	var newOrderResponse NewTriggerOrderResponse
+	requestBody, err := json.Marshal(NewTriggerOrder{
+		Market:       ticker,
+		Side:         side,
+		TriggerPrice: price,
+		Size:         size,
+		Type:         orderType,
+		ReduceOnly:   reduceOnly})
+	if err != nil {
+		log.Printf("Error PlaceOrder %v", err)
+		return newOrderResponse, err
+	}
+	resp, err := f.post("conditional_orders", requestBody)
+
+	if err != nil {
+		log.Printf("Error PlaceOrder %v", err)
 		return newOrderResponse, err
 	}
 	err = processResponse(resp, &newOrderResponse)
