@@ -42,20 +42,6 @@ func (f *Client) GetOpenOrders(ticker ...string) ([]Order, error) {
 	return out, err
 }
 
-/*
-{
-  "market": "XRP-PERP",
-  "side": "sell",
-  "price": 0.306525,
-  "type": "limit",
-  "size": 31431.0,
-  "reduceOnly": false,
-  "ioc": false,
-  "postOnly": false,
-  "clientId": null
-}
-*/
-
 type NewOrderResponse struct {
 	Success bool  `json:"success"`
 	Result  Order `json:"result"`

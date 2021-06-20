@@ -15,7 +15,7 @@ func TestNewOrder(t *testing.T) {
 		}
 		fmt.Println(r.Result)*/
 
-	b, err := c.SetTriggerOrder("xrp-perp", "sell", 0.50, 10, "stop", false)
+	b, err := c.GetMarket("xrp-perp")
 
 	if err != nil {
 		t.Errorf("Error %v", err)
