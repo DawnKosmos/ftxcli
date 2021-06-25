@@ -1,3 +1,4 @@
 *.acc
 *.test
 main.go
+ftx_test.go

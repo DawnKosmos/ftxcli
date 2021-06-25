@@ -2,15 +2,30 @@ package parser
 
 import (
 	"fmt"
-	"strings"
 	"testing"
 )
 
 func TestLexer(t *testing.T) {
-	c := "buy 10% -l 38030 38070 5"
+	c := "y = buy btc-perp 10% -high 5h -l 5 -10 -30"
+	r, err := Lexer(c)
 
-	r, _ := Lexer(strings.Split(c, " "))
-	for _, v := range r {
-		fmt.Println(v)
+	if err != nil {
+		t.Fatal(err)
 	}
+
+	fmt.Println(r)
+	_, err = Parse(r)
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(vl["y"])
+	/*
+		o, err := ParseOrder("buy", r)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		fmt.Println(o)*/
 }
