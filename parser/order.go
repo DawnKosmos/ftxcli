@@ -3,6 +3,8 @@ package parser
 import (
 	"errors"
 	"strconv"
+
+	"github.com/DawnKosmos/ftxcmd/ftx"
 )
 
 type OrderType int
@@ -13,10 +15,11 @@ const (
 )
 
 type Order struct {
-	Side   string
-	Ticker string
-	A      Amount
-	P      Price
+	Side    string
+	Ticker  string
+	A       Amount
+	P       Price
+	Balance float64
 }
 
 type AmountType int
@@ -69,10 +72,6 @@ func ParseOrder(Side string, tl []Token) (*Order, error) {
 	}
 
 	return &order, nil
-}
-
-func (o *Order) Evaluate() {
-	return
 }
 
 type PriceType int
@@ -212,4 +211,111 @@ func ParsePriceFlag(tl []Token, p *Price, flag string) (err error) {
 
 	// THEORETICAL PARSE A STOPS and OTHER EXTRA STUFF HERE
 	return nil
+}
+
+func (o *Order) Evaluate(f ftx.Client) error {
+	size, err := o.A.Evaluate(f, o.Ticker)
+	if err != nil {
+		return err
+	}
+
+}
+
+func (a *Amount) Evaluate(f ftx.Client, ticker string) (size float64, err error) {
+	switch a.Type {
+	case COIN:
+		return a.Val, nil
+	case FIAT:
+		m, err := f.GetMarket(ticker)
+		if err != nil {
+			return a.Val, err
+		}
+		temp := (m.Ask + m.Bid + m.Last) / 3
+		return a.Val / temp, nil
+	case ACCOUNTSIZE:
+		m, err := f.GetMarket(ticker)
+		if err != nil {
+			return a.Val, err
+		}
+		temp := (m.Ask + m.Bid + m.Last) / 3
+		account, err := f.GetAccount()
+		if err != nil {
+			return a.Val, err
+		}
+		az := account.FreeCollateral * a.Val / 100
+
+		return az / temp, nil
+	default:
+		return
+	}
+}
+
+func (p *Price) Evaluate(f ftx.Client, side string, ticker string, size float64) (err error) {
+	if p.Type == PRICE {
+		_, err = f.SetOrder(ticker, side, p.Values[0], size, "limit", false)
+		return err
+	}
+
+	var mp float64
+	if p.PC == "market" {
+		m, err := f.GetMarket(ticker)
+		if err != nil {
+			return err
+		}
+		mp = (m.Ask + m.Bid + m.Last) / 3
+	} else {
+		mp, err = f.GetPriceSource(p.PC, ticker, p.Duration)
+	}
+
+	switch p.Type {
+	case DIFFERENCE:
+
+	case PERCENTPRICE:
+	}
+}
+
+func (p *Price) EvaluateDifference(f ftx.Client, side string, ticker string, size float64, mp float64) error {
+	var factor float64
+	if side == "sell" {
+		factor = -1.0
+	}
+
+	if !p.IsLaddered[0] {
+		_, err := f.SetOrder(ticker, side, mp-p.Values[0]*factor, size, "limit", false)
+		return err
+	}
+
+	p1, p2 := mp-p.Values[1]*factor, mp-p.Values[2]*factor
+	plo := GetPricesLadderedOrder(p.IsLaddered[1], p.Values[0], p1, p2)
+
+	for _, v := range plo {
+		_, err := f.SetOrder(ticker, side, v[0], v[1], "limit", false)
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func GetPricesLadderedOrder(exponential bool, split, p1, p2 float64) [][2]float64 {
+	k := (p1 - p2) / split
+
+	sum := split * (split + 1) / 20
+	var fn func(iterate int, parti float64) float64
+	if exponential {
+		fn = func(iterate int, parti float64) float64 {
+			return (float64(iterate+1) / parti) / sum
+		}
+	} else {
+		fn = func(iterate int, parti float64) float64 {
+			return 1 / parti
+		}
+	}
+
+	var o [][2]float64
+	for i := 0; i < int(split); i++ {
+		o = append(o, [2]float64{p1 + k*float64(i), fn(i, split)})
+	}
+	return o
 }

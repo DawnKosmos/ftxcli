@@ -14,7 +14,7 @@ type Engine struct {
 var vl map[string]Variable
 
 type Parser interface {
-	Evaluate()
+	Evaluate(f ftx.Client)
 }
 
 func Parse(tl []Token) (Parser, error) {
