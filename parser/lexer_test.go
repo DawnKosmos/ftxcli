@@ -6,7 +6,7 @@ import (
 )
 
 func TestLexer(t *testing.T) {
-	c := "y = buy btc-perp 10% -high 5h -l 5 -10 -30"
+	c := "y = buy btc-perp 10% -high 3h 1%"
 	r, err := Lexer(c)
 
 	if err != nil {
@@ -20,7 +20,13 @@ func TestLexer(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	fmt.Println(vl["y"])
+	r, err = Lexer("y")
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	fmt.Println(r)
 	/*
 		o, err := ParseOrder("buy", r)
 		if err != nil {

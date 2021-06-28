@@ -26,6 +26,16 @@ SIDE   VARIABLE   PERCENT FLOAT UFLOAT VARIABLE
 [buy,sell] [ticker] [10%, 0.1, u200] [(market, 38100, d100, 2%), (-(high,low) 3h [d100, 2%]), (-l [38100 38300, d100 d300, 1% 3%])
 stop [ticker]
 
+
+zusätzlich
+
+cancle -all
+cancle btc-perp
+cancle -buy
+
+funding -position //funding rate der aktuellen positionen
+funding -highest 20 //funding der highest 20 coins
+
 */
 
 type TokenType int
@@ -61,6 +71,10 @@ func (t TokenType) String() string {
 		s = ")"
 	case SOURCE:
 		s = "source"
+	case CANCLE:
+		s = "cancle"
+	case FUNDING:
+		s = "funding"
 	}
 	return s
 }
@@ -80,6 +94,8 @@ const (
 	LBRACKET
 	RBRACKET
 	SOURCE
+	CANCLE
+	FUNDING
 )
 
 type Token struct {
@@ -109,6 +125,10 @@ func Lexer(inputS string) (t []Token, err error) {
 			t = append(t, Token{LBRACKET, ""})
 		case ")":
 			t = append(t, Token{RBRACKET, ""})
+		case "cancle":
+			t = append(t, Token{CANCLE, "cancle"})
+		case "funding":
+			t = append(t, Token{FUNDING, "fundus"})
 		default:
 			if (s[last] == 'h' || s[last] == 'm' || s[last] == 'd') && len(s) > 1 {
 				_, err := strconv.Atoi(s[:last])

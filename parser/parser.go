@@ -1,6 +1,15 @@
 package parser
 
-import "errors"
+import (
+	"errors"
+
+	"github.com/DawnKosmos/ftxcmd/ftx"
+)
+
+type Engine struct {
+	Vl      map[string]Variable
+	Account ftx.Client
+}
 
 var vl map[string]Variable
 
