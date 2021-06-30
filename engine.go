@@ -36,8 +36,6 @@ func Start(e ...interface{}) {
 		input, _ := reader.ReadString('\n')
 		input = strings.Replace(input, "\n", "", -1)
 		t, err := parser.Lexer(input[:len(input)-1])
-		fmt.Println(input)
-		fmt.Println(t)
 		if err != nil {
 			fmt.Println(err)
 			continue

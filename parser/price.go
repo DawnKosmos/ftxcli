@@ -233,8 +233,8 @@ func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, si
 	plo := GetPricesLadderedOrder(p.IsLaddered[1], p.Values[0], p1, p2)
 
 	for _, v := range plo {
-		fmt.Println(v[0], size*v[1])
-		_, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
+		p, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
+		fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
 		if err != nil {
 			return err
 		}

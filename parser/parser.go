@@ -2,7 +2,6 @@ package parser
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/DawnKosmos/ftxcmd/ftx"
 )
@@ -61,14 +60,12 @@ func Parse(tl []Token) (Evaluater, error) {
 		nl, err = ParseVariable(v, tl[1:])
 	}
 
-	fmt.Println(nl)
 	switch nl[0].Type {
 	case SIDE:
 		o, err := ParseOrder(nl[0].Text, nl[1:])
 		if err != nil {
 			return nil, err
 		}
-		fmt.Println(o.A, o.P)
 		return o, nil
 	case STOP:
 	case CANCLE:
