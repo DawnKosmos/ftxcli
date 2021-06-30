@@ -7,7 +7,7 @@ import (
 
 /*
 
-Syntax:
+Grammatic kinda:
 
 ORDER = { SIDE ~ TICKER ~ AMOUNT ~  PRICE}  !
 PRICE ::= {LADERED | FLOAT | PERCENT | DIFF | CLADERED} !
@@ -27,7 +27,7 @@ SIDE   VARIABLE   PERCENT FLOAT UFLOAT VARIABLE
 stop [ticker]
 
 
-zusätzlich
+also
 
 cancle -all
 cancle btc-perp
@@ -39,45 +39,6 @@ funding -highest 20 //funding der highest 20 coins
 */
 
 type TokenType int
-
-func (t TokenType) String() string {
-	var s string
-	switch t {
-	case SIDE:
-		s = "side"
-	case VARIABLE:
-		s = "var"
-	case STOP:
-		s = "stop"
-	case FLOAT:
-		s = "float"
-	case UFLOAT:
-		s = "ufloat"
-	case DFLOAT:
-		s = "dfloat"
-	case PERCENT:
-		s = "percent"
-	case ASSIGN:
-		s = "assign"
-	case FLAG:
-		s = "flag"
-	case FUNC:
-		s = "func"
-	case DURATION:
-		s = "duration"
-	case LBRACKET:
-		s = "("
-	case RBRACKET:
-		s = ")"
-	case SOURCE:
-		s = "source"
-	case CANCLE:
-		s = "cancle"
-	case FUNDING:
-		s = "funding"
-	}
-	return s
-}
 
 const (
 	VARIABLE TokenType = iota
@@ -103,6 +64,7 @@ type Token struct {
 	Text string
 }
 
+//Lexer reads the input checks it for some errors and outputs a Token list
 func Lexer(inputS string) (t []Token, err error) {
 
 	input := strings.Split(inputS, " ")
@@ -193,6 +155,7 @@ func Lexer(inputS string) (t []Token, err error) {
 	return t, nil
 }
 
+//lexVariable parses Functions
 func lexVariable(s []byte) []Token {
 	var temp []byte
 	var tk []Token
@@ -239,4 +202,43 @@ func lexFunc(s []byte) []Token {
 	}
 
 	return tk
+}
+
+func (t TokenType) String() string {
+	var s string
+	switch t {
+	case SIDE:
+		s = "side"
+	case VARIABLE:
+		s = "var"
+	case STOP:
+		s = "stop"
+	case FLOAT:
+		s = "float"
+	case UFLOAT:
+		s = "ufloat"
+	case DFLOAT:
+		s = "dfloat"
+	case PERCENT:
+		s = "percent"
+	case ASSIGN:
+		s = "assign"
+	case FLAG:
+		s = "flag"
+	case FUNC:
+		s = "func"
+	case DURATION:
+		s = "duration"
+	case LBRACKET:
+		s = "("
+	case RBRACKET:
+		s = ")"
+	case SOURCE:
+		s = "source"
+	case CANCLE:
+		s = "cancle"
+	case FUNDING:
+		s = "funding"
+	}
+	return s
 }

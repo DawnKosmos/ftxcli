@@ -2,36 +2,65 @@ package parser
 
 import (
 	"fmt"
+	"io/ioutil"
+	"net/http"
+	"strings"
 	"testing"
+
+	"github.com/DawnKosmos/ftxcmd/ftx"
 )
 
-func TestLexer(t *testing.T) {
-	c := "y = buy btc-perp 10% -high 3h 1%"
-	r, err := Lexer(c)
+/*
+func TestAmount(t *testing.T) {
 
+	data, err := ioutil.ReadFile("main.acc")
 	if err != nil {
-		t.Fatal(err)
+		fmt.Println("File reading error", err)
+		return
 	}
 
-	fmt.Println(r)
-	_, err = Parse(r)
+	s := strings.Split(string(data), " ")
+	c := &http.Client{}
 
-	if err != nil {
-		t.Fatal(err)
+	f := ftx.NewClient(c, s[1], s[2], s[0])
+	a := Amount{
+		Type: ACCOUNTSIZE,
+		Val:  200,
 	}
 
-	r, err = Lexer("y")
+	v, err := a.Evaluate(f, "btc-perp")
 
+	fmt.Println(v)
+}*/
+
+func TestLadder(t *testing.T) {
+
+	data, err := ioutil.ReadFile("main.acc")
 	if err != nil {
-		t.Fatal(err)
+		fmt.Println("File reading error", err)
+		return
 	}
 
-	fmt.Println(r)
-	/*
-		o, err := ParseOrder("buy", r)
-		if err != nil {
-			t.Fatal(err)
-		}
+	s := strings.Split(string(data), " ")
+	c := &http.Client{}
 
-		fmt.Println(o)*/
+	f := ftx.NewClient(c, s[1], s[2], s[0])
+	p := &Price{Type: PERCENTPRICE,
+		PC:         "low",
+		Duration:   3600,
+		IsLaddered: [2]bool{true, true},
+		Values:     [3]float64{4, 5, 10},
+	}
+
+	err = p.Evaluate(f, "buy", "xrp-perp", 100)
+
+	if err != nil {
+		fmt.Println(err)
+		t.Fail()
+	}
 }
+
+/*
+5 30000 31000 32000 33000 34000
+
+*/
