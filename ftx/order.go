@@ -136,9 +136,36 @@ func (f *Client) SetTriggerOrder(ticker string, side string, price, size float64
 	resp, err := f.post("conditional_orders", requestBody)
 
 	if err != nil {
-		log.Printf("Error PlaceOrder %v", err)
+		log.Printf("Error PlaceTriggerOrder %v", err)
 		return newOrderResponse, err
 	}
 	err = processResponse(resp, &newOrderResponse)
 	return newOrderResponse, err
+}
+
+type CancelOrders struct {
+	market          string
+	conditionalOnly bool
+	limitOnly       bool
+}
+
+func (f *Client) DeleteOrders(market string, conditionalOnly, limitOnly bool) (Response, error) {
+	var resp Response
+	requestBody, err := json.Marshal(CancelOrders{
+		market:          market,
+		conditionalOnly: conditionalOnly,
+		limitOnly:       limitOnly,
+	})
+	if err != nil {
+		log.Printf("Error PlaceOrder %v", err)
+		return resp, err
+	}
+	respRequest, err := f.delete("orders", requestBody)
+
+	if err != nil {
+		log.Printf("Error Delete Orders %v", err)
+		return resp, err
+	}
+	err = processResponse(respRequest, &resp)
+	return resp, err
 }

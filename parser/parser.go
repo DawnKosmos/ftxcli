@@ -68,7 +68,12 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 		return o, nil
 	case STOP:
-	case CANCLE:
+	case CANCEL:
+		o, err := ParseCancel(nl)
+		if err != nil {
+			return nil, err
+		}
+		return o, nil
 	case FUNDING:
 	default:
 		return nil, errors.New(nl[0].Text + " Is not a legit command")

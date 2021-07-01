@@ -55,7 +55,7 @@ const (
 	LBRACKET
 	RBRACKET
 	SOURCE
-	CANCLE
+	CANCEL
 	FUNDING
 )
 
@@ -87,8 +87,8 @@ func Lexer(inputS string) (t []Token, err error) {
 			t = append(t, Token{LBRACKET, ""})
 		case ")":
 			t = append(t, Token{RBRACKET, ""})
-		case "cancle":
-			t = append(t, Token{CANCLE, "cancle"})
+		case "cancel":
+			t = append(t, Token{CANCEL, "cancel"})
 		case "funding":
 			t = append(t, Token{FUNDING, "fundus"})
 		default:
@@ -235,8 +235,8 @@ func (t TokenType) String() string {
 		s = ")"
 	case SOURCE:
 		s = "source"
-	case CANCLE:
-		s = "cancle"
+	case CANCEL:
+		s = "cancel"
 	case FUNDING:
 		s = "funding"
 	}
