@@ -3,6 +3,8 @@ package parser
 import (
 	"errors"
 	"strconv"
+
+	"github.com/DawnKosmos/ftxcmd/ftx"
 )
 
 /*
@@ -71,4 +73,31 @@ func ParseFunding(tl []Token) (*Funding, error) {
 		}
 	}
 	return &fund, nil
+}
+
+/*
+	Payments: Show Payed fees for a time period + have option to sum + sort by pair
+	Positions: Showing the funding fees since the position got created
+	General: sowing funding of coins, sum up
+*/
+func (f *Funding) Evaluate(c *ftx.Client) error {
+	switch f.ft {
+	case PAYMENTS:
+
+	case POSITIONS:
+	case GENERAL:
+	}
+
+}
+
+func EvaluatePayments(c *ftx.Client) error {
+	return nil
+}
+
+func EvaluatePositions(c *ftx.Client) error {
+	return nil
+}
+
+func EvaluateGeneral(c *ftx.Client) error {
+	return nil
 }

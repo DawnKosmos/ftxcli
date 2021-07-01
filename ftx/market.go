@@ -130,25 +130,3 @@ func LowestHighestCandles(src string, ch []Candle) (out float64) {
 	}
 	return out
 }
-
-/*
-func (p *Public) GetFundingRates(ticker string, st, et int64) ([]FundingRates, error) {
-	var fr FundingRatesResponse
-
-	resp, err := p.get(
-		"funding_rates?future="+ticker+
-			"&start_time="+strconv.FormatInt(st, 10)+
-			"&end_time="+strconv.FormatInt(et, 10),
-		[]byte(""))
-
-	if err != nil {
-		log.Println("ERROR OHCLV FTX", err)
-		return nil, err
-	}
-
-	err = processResponse(resp, &fr)
-
-	return fr.Result, nil
-
-}
-*/
