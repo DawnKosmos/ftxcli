@@ -36,6 +36,8 @@ cancle -buy
 funding -position //funding rate der aktuellen positionen
 funding -highest 20 //funding der highest 20 coins
 
+
+stop buy btc-perp [position, u100,0.1] -low 5h
 */
 
 type TokenType int
@@ -57,6 +59,7 @@ const (
 	SOURCE
 	CANCEL
 	FUNDING
+	POSITION
 )
 
 type Token struct {
@@ -91,6 +94,8 @@ func Lexer(inputS string) (t []Token, err error) {
 			t = append(t, Token{CANCEL, "cancel"})
 		case "funding":
 			t = append(t, Token{FUNDING, "fundus"})
+		case "position":
+			t = append(t, Token{POSITION, ""})
 		default:
 			if (s[last] == 'h' || s[last] == 'm' || s[last] == 'd') && len(s) > 1 {
 				_, err := strconv.Atoi(s[:last])
@@ -135,7 +140,7 @@ func Lexer(inputS string) (t []Token, err error) {
 			}
 
 			if s[last] == '%' {
-				_, err := strconv.Atoi(s[:last])
+				_, err := strconv.ParseFloat(s[:last], 64)
 				if err != nil {
 					return t, err
 				}
@@ -239,6 +244,8 @@ func (t TokenType) String() string {
 		s = "cancel"
 	case FUNDING:
 		s = "funding"
+	case POSITION:
+		s = "position"
 	}
 	return s
 }

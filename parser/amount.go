@@ -10,6 +10,7 @@ const (
 	COIN AmountType = iota
 	FIAT
 	ACCOUNTSIZE
+	POSITIONSIZE
 )
 
 type Amount struct {
@@ -18,6 +19,7 @@ type Amount struct {
 }
 
 func (a *Amount) Evaluate(f *ftx.Client, ticker string) (size float64, err error) {
+
 	switch a.Type {
 	case COIN:
 		return a.Val, nil
@@ -41,7 +43,18 @@ func (a *Amount) Evaluate(f *ftx.Client, ticker string) (size float64, err error
 		az := account.FreeCollateral * a.Val / 100
 
 		return az / temp, nil
+	case POSITIONSIZE:
+		pz, err := f.GetPosition()
+		if err != nil {
+			return a.Val, err
+		}
+		for _, v := range pz {
+			if v.Future == ticker {
+				return v.PositionSize, nil
+			}
+		}
 	default:
 		return
 	}
+	return a.Val, nil
 }

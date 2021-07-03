@@ -8,7 +8,6 @@ import (
 
 /*
 TODO:
-Cancle, Funding, Stop
 Go Routines for faster execution
 Creating expected result and showing the result of the expression
 */
@@ -68,6 +67,14 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 		return o, nil
 	case STOP:
+		if nl[1].Type == VARIABLE {
+			o, err := ParseStop(nl[1].Text, nl[2:])
+			if err != nil {
+				return nil, err
+			}
+			return o, nil
+		}
+		return nil, errors.New("After A Stop a ticker has to follow")
 	case CANCEL:
 		o, err := ParseCancel(nl)
 		if err != nil {
@@ -75,6 +82,11 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 		return o, nil
 	case FUNDING:
+		o, err := ParseFunding(nl[1:])
+		if err != nil {
+			return nil, err
+		}
+		return o, nil
 	default:
 		return nil, errors.New(nl[0].Text + " Is not a legit command")
 	}

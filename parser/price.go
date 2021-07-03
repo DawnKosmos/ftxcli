@@ -10,6 +10,14 @@ import (
 
 type PriceSource int
 
+type PriceType int
+
+const (
+	PRICE PriceType = iota
+	DIFFERENCE
+	PERCENTPRICE
+)
+
 type Price struct {
 	Type       PriceType
 	PC         string
@@ -19,19 +27,10 @@ type Price struct {
 	Values [3]float64
 }
 
-type PriceType int
-
-const (
-	PRICE PriceType = iota
-	DIFFERENCE
-	PERCENTPRICE
-)
-
 func ParsePrice(tl []Token) (p Price, err error) {
 
 	p.PC = "market"
 	if tl[0].Type == SOURCE {
-		p.PC = tl[0].Text
 
 		switch tl[0].Text {
 		case "high":
@@ -81,7 +80,7 @@ func ParsePrice(tl []Token) (p Price, err error) {
 		return p, errors.New(tl[0].Type.String() + "is not a correct Price with value" + tl[0].Text)
 	}
 
-	p.Values[0], err = strconv.ParseFloat(tl[1].Text, 64)
+	p.Values[0], err = strconv.ParseFloat(tl[0].Text, 64)
 	if err != nil {
 		return p, err
 	}
@@ -224,7 +223,7 @@ func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, si
 	//var err error
 
 	if !p.IsLaddered[0] {
-		_, err := f.SetOrder(ticker, side, mp-p.Values[0]*factor, size, "limit", false)
+		_, err := f.SetOrder(ticker, side, mp-mp*p.Values[0]/100*factor, size, "limit", false)
 		return err
 	}
 
@@ -234,10 +233,11 @@ func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, si
 
 	for _, v := range plo {
 		p, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
-		fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
 		if err != nil {
 			return err
 		}
+		fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+
 	}
 
 	return nil

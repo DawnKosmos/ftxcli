@@ -2,12 +2,7 @@ package parser
 
 import (
 	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
 	"testing"
-
-	"github.com/DawnKosmos/ftxcmd/ftx"
 )
 
 /*
@@ -35,7 +30,14 @@ func TestAmount(t *testing.T) {
 
 func TestLadder(t *testing.T) {
 
-	data, err := ioutil.ReadFile("main.acc")
+	s := "x(buy,btc-perp)"
+
+	b, err := Lexer(s)
+	if err != nil {
+		t.Fail()
+	}
+	fmt.Println(b)
+	/*data, err := ioutil.ReadFile("main.acc")
 	if err != nil {
 		fmt.Println("File reading error", err)
 		return
@@ -58,10 +60,5 @@ func TestLadder(t *testing.T) {
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
-	}
+	} */
 }
-
-/*
-5 30000 31000 32000 33000 34000
-
-*/

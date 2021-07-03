@@ -15,11 +15,10 @@ const (
 )
 
 type Order struct {
-	Side    string
-	Ticker  string
-	A       Amount
-	P       Price
-	Balance float64
+	Side   string
+	Ticker string
+	A      Amount
+	P      Price
 }
 
 func ParseOrder(Side string, tl []Token) (*Order, error) {
@@ -64,11 +63,13 @@ func ParseOrder(Side string, tl []Token) (*Order, error) {
 
 //Evaluate the ordersize and prices
 func (o *Order) Evaluate(f *ftx.Client) error {
+	//We first get the amount evaluate, it depends on the type of amount and price source, low, high or market
 	size, err := o.A.Evaluate(f, o.Ticker)
 	if err != nil {
 		return err
 	}
 
+	//the price get evaluation also places the orders
 	err = o.P.Evaluate(f, o.Side, o.Ticker, size)
 	return err
 }

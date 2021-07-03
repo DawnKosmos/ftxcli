@@ -144,17 +144,17 @@ func (f *Client) SetTriggerOrder(ticker string, side string, price, size float64
 }
 
 type CancelOrders struct {
-	market          string
-	conditionalOnly bool
-	limitOnly       bool
+	Market          string `json:"market,omitempty"`
+	ConditionalOnly bool   `json:"conditionalOrdersOnly,omitempty"`
+	LimitOnly       bool   `json:"limitOrdersOnly,omitempty"`
 }
 
 func (f *Client) DeleteOrders(market string, conditionalOnly, limitOnly bool) (Response, error) {
 	var resp Response
 	requestBody, err := json.Marshal(CancelOrders{
-		market:          market,
-		conditionalOnly: conditionalOnly,
-		limitOnly:       limitOnly,
+		Market:          market,
+		ConditionalOnly: conditionalOnly,
+		LimitOnly:       limitOnly,
 	})
 	if err != nil {
 		log.Printf("Error PlaceOrder %v", err)
