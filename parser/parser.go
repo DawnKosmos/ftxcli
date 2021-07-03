@@ -87,37 +87,13 @@ func Parse(tl []Token) (Evaluater, error) {
 			return nil, err
 		}
 		return o, nil
+	case FUNDINGRATES:
+		o, err := ParseFundingRates(nl[1:])
+		if err != nil {
+			return nil, err
+		}
+		return o, nil
 	default:
 		return nil, errors.New(nl[0].Text + " Is not a legit command")
 	}
-
-	return nil, nil
 }
-
-/*
-
-SIDE ::= {buy | sell}
-PRICE ::= {LADERED | FLOAT | PERCENT | DIFF }
-
-
-
-func ParseCommand(command string, l []Token) Parser {
-	var or Order
-	or.Order = command
-	if l[0].Type != VARIABLE {
-		fmt.Println(l[0], "is not a ticker nor variable")
-
-		v, ok := vl[l[0].Text]
-		if ok =
-
-	}
-
-}
-
-VARIABLE
-	Constanten
-	Functionen
-
-
-
-*/

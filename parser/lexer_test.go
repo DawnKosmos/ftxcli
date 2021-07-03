@@ -29,36 +29,25 @@ func TestAmount(t *testing.T) {
 }*/
 
 func TestLadder(t *testing.T) {
+	/*
+		data, err := ioutil.ReadFile("main.acc")
+		if err != nil {
+			fmt.Println("File reading error", err)
+			return
+		}
 
-	s := "x(buy,btc-perp)"
+		s := strings.Split(string(data), " ")
+		c := &http.Client{}
 
-	b, err := Lexer(s)
-	if err != nil {
-		t.Fail()
-	}
-	fmt.Println(b)
-	/*data, err := ioutil.ReadFile("main.acc")
-	if err != nil {
-		fmt.Println("File reading error", err)
-		return
-	}
+		f := ftx.NewClient(c, s[1], s[2], s[0])
+	*/
 
-	s := strings.Split(string(data), " ")
-	c := &http.Client{}
+	s := "x(u100,-100,-200)"
 
-	f := ftx.NewClient(c, s[1], s[2], s[0])
-
-	fr := Funding{
-		ft:        GENERAL,
-		Ticker:    []string{"oxy-perp", "iota-perp", "etc-perp"},
-		Time:      3600 * 20 * 24,
-		Summarize: true,
-	}
-
-	err = fr.Evaluate(f)
-
+	o, err := Lexer(s)
 	if err != nil {
 		fmt.Println(err)
 		t.Fail()
-	} */
+	}
+	fmt.Println(o)
 }

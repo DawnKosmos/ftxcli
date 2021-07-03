@@ -176,56 +176,6 @@ func PrintFundingPayments(summarize bool, fp ...[]ftx.FundingPayments) error {
 	return nil
 }
 
-func PrintFunding(summarize bool, fp ...[]ftx.FundingRates) {
-	printfr := make([][]ftx.FundingRates, len(fp[0]))
-	for i, v := range fp[0] {
-		printfr[i] = []ftx.FundingRates{v}
-	}
-	if len(fp) == 1 {
-
-	} else {
-		for _, v := range fp[1:] {
-			for i, vv := range v {
-				printfr[i] = append(printfr[i], vv)
-			}
-		}
-	}
-	fmt.Print("Ticker: \t")
-
-	for _, v := range printfr[0] {
-		fmt.Print(v.Future, " ")
-	}
-
-	if summarize {
-		ff := make([]float64, len(printfr[0]), len(printfr[0]))
-
-		for _, v := range printfr {
-			for i, vv := range v {
-				ff[i] = ff[i] + vv.Rate
-			}
-		}
-
-		fmt.Print("\nSummarized\t")
-		for _, v := range ff {
-			ss := fmt.Sprintf("%.4f", float64(v*100))
-			fmt.Print(ss, "\t")
-		}
-		return
-	}
-
-	fmt.Print("\n")
-	for _, v := range printfr {
-		fmt.Print(v[0].Time.Format("02.07.06 15"), "\t")
-		for _, vv := range v {
-			ff := fmt.Sprintf("%.4f", float64(vv.Rate*100))
-			fmt.Print(ff, "\t")
-		}
-		fmt.Print("\n")
-	}
-
-	return
-}
-
 /*	mapfr := make(map[int64][]ftx.FundingRates)
 	for _, v := range fp {
 		for _, vv := range v {

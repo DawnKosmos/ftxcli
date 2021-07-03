@@ -60,6 +60,7 @@ const (
 	CANCEL
 	FUNDING
 	POSITION
+	FUNDINGRATES
 )
 
 type Token struct {
@@ -96,6 +97,8 @@ func Lexer(inputS string) (t []Token, err error) {
 			t = append(t, Token{FUNDING, "fundus"})
 		case "position":
 			t = append(t, Token{POSITION, ""})
+		case "fundingrates":
+			t = append(t, Token{FUNDINGRATES, ""})
 		default:
 			if (s[last] == 'h' || s[last] == 'm' || s[last] == 'd') && len(s) > 1 {
 				_, err := strconv.Atoi(s[:last])
@@ -171,19 +174,16 @@ func lexVariable(s []byte) []Token {
 			tk = append(tk, Token{VARIABLE, string(temp)}, Token{LBRACKET, ""})
 			temp = []byte("")
 		case ')':
-			tk = append(tk, Token{VARIABLE, string(temp)}, Token{RBRACKET, ""})
+			l, _ := Lexer(string(temp))
+			tk = append(tk, l...)
+			tk = append(tk, Token{RBRACKET, ""})
 			temp = []byte("")
 		case ',':
-			tk = append(tk, Token{VARIABLE, string(temp)})
-			temp = []byte("")
+			temp = append(temp, ' ')
 		default:
 			temp = append(temp, v)
 		}
 	}
-	if len(temp) > 0 {
-		tk = append(tk, Token{VARIABLE, string(temp)})
-	}
-
 	return tk
 }
 
@@ -205,7 +205,6 @@ func lexFunc(s []byte) []Token {
 			temp = append(temp, v)
 		}
 	}
-
 	return tk
 }
 
