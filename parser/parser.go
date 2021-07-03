@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 
 	"github.com/DawnKosmos/ftxcmd/ftx"
 )
@@ -40,6 +41,10 @@ func Parse(tl []Token) (Evaluater, error) {
 	if tl[0].Type == VARIABLE {
 		v, ok := vl[tl[0].Text]
 		if !ok {
+			if len(tl) == 1 {
+				return nil, errors.New("THE VARIABLE IS UNKNOWN " + tl[0].Text)
+			}
+
 			if tl[1].Type == ASSIGN {
 				err = ParseAssign(tl[0].Text, tl[2:])
 				return nil, err
@@ -57,7 +62,12 @@ func Parse(tl []Token) (Evaluater, error) {
 			}
 		}
 		nl, err = ParseVariable(v, tl[1:])
+		if err != nil {
+			return nil, err
+		}
 	}
+
+	fmt.Println(nl)
 
 	switch nl[0].Type {
 	case SIDE:
@@ -94,6 +104,6 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 		return o, nil
 	default:
-		return nil, errors.New(nl[0].Text + " Is not a legit command")
+		return nil, errors.New(nl[0].Type.String() + " Is not a legit command")
 	}
 }

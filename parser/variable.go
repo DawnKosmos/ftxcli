@@ -1,6 +1,8 @@
 package parser
 
-import "errors"
+import (
+	"errors"
+)
 
 type VariableType int
 
@@ -18,7 +20,7 @@ type Variable struct {
 func ParseVariable(v Variable, tl []Token) ([]Token, error) {
 	switch v.Type {
 	case FUNCTION:
-		l, err := ParseFunc(v.Content, tl[1:])
+		l, err := ParseFunc(v.Content, tl)
 		if err != nil {
 			return tl, err
 		}

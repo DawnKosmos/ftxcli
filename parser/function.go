@@ -30,22 +30,14 @@ func (f *Func) Parse(tl []Token) ([]Token, error) {
 	if tl[0].Type != LBRACKET {
 		return tl, errors.New("Syntax error, no bracket" + tl[0].Text)
 	}
-	var ss string
+	var s []Token
 	for _, v := range tl[1:] {
 		switch v.Type {
 		case RBRACKET:
 			break
-		case VARIABLE:
-			ss += v.Text + " "
 		default:
-			return tl, errors.New("Undentified error")
+			s = append(s, v)
 		}
-	}
-
-	s, err := Lexer(ss)
-
-	if err != nil {
-		return tl, err
 	}
 
 	if len(s) != f.NumberOfParameters {

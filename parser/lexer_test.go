@@ -42,7 +42,7 @@ func TestLadder(t *testing.T) {
 		f := ftx.NewClient(c, s[1], s[2], s[0])
 	*/
 
-	s := "x(u100,-100,-200)"
+	s := "x(btc-perp,5%,10%)"
 
 	o, err := Lexer(s)
 	if err != nil {

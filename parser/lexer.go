@@ -184,6 +184,10 @@ func lexVariable(s []byte) []Token {
 			temp = append(temp, v)
 		}
 	}
+
+	if len(temp) != 0 {
+		tk = append(tk, Token{VARIABLE, string(temp)})
+	}
 	return tk
 }
 
@@ -205,6 +209,7 @@ func lexFunc(s []byte) []Token {
 			temp = append(temp, v)
 		}
 	}
+
 	return tk
 }
 
