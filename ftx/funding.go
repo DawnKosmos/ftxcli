@@ -50,7 +50,7 @@ type FundingRatesResponse struct {
 
 type FundingRates struct {
 	Future string    `json:"future,omitempty"`
-	Rate   float64   `json:"payment,omitempty"`
+	Rate   float64   `json:"rate,omitempty"`
 	Time   time.Time `json:"time,omitempty"`
 }
 

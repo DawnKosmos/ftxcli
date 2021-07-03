@@ -45,14 +45,15 @@ func TestLadder(t *testing.T) {
 	c := &http.Client{}
 
 	f := ftx.NewClient(c, s[1], s[2], s[0])
-	p := &Price{Type: PERCENTPRICE,
-		PC:         "low",
-		Duration:   3600,
-		IsLaddered: [2]bool{true, true},
-		Values:     [3]float64{4, 5, 10},
+
+	fr := Funding{
+		ft:        GENERAL,
+		Ticker:    []string{"oxy-perp", "iota-perp", "etc-perp"},
+		Time:      3600 * 20 * 24,
+		Summarize: true,
 	}
 
-	err = p.Evaluate(f, "buy", "xrp-perp", 100)
+	err = fr.Evaluate(f)
 
 	if err != nil {
 		fmt.Println(err)
