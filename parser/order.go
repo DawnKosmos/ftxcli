@@ -27,6 +27,10 @@ func ParseOrder(Side string, tl []Token) (*Order, error) {
 	var amount Amount
 	var err error
 
+	if len(tl) == 0 {
+		return nil, errors.New("Parse Order has to have an input and cant be empty")
+	}
+
 	if tl[0].Type == VARIABLE {
 		order.Ticker = tl[0].Text
 	}

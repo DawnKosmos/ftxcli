@@ -23,6 +23,9 @@ type TriggerOrder struct {
 }
 
 func ParseStop(side string, tl []Token) (*TriggerOrder, error) {
+	if len(tl) == 0 {
+
+	}
 	var tOrder TriggerOrder
 	tOrder.Side = side
 	var amount Amount

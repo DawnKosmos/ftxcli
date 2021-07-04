@@ -2,7 +2,6 @@ package parser
 
 import (
 	"errors"
-	"fmt"
 )
 
 /*
@@ -29,7 +28,6 @@ func ParseAssign(name string, tk []Token) (err error) {
 	case STOP:
 		vl[name] = Variable{EXPRESSION, tk}
 	default:
-		fmt.Println(tk[0].Type)
 		vl[name] = Variable{CONSTANT, tk}
 	}
 
@@ -37,6 +35,10 @@ func ParseAssign(name string, tk []Token) (err error) {
 }
 
 func ParseAssignFunc(name string, tk []Token) (f Func, err error) {
+	if len(tk) == 0 {
+		return f, errors.New("Empty Func can't be assigned to a Variable")
+	}
+
 	if tk[0].Type != LBRACKET {
 		return f, errors.New("Syntax error, no bracket" + tk[0].Text)
 	}

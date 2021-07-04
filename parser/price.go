@@ -89,6 +89,9 @@ func ParsePrice(tl []Token) (p Price, err error) {
 }
 
 func ParsePriceFlag(tl []Token, p *Price, flag string) (err error) {
+	if len(tl) > 3 {
+		return errors.New("Not enough arguments")
+	}
 	switch flag {
 	case "l":
 		p.IsLaddered = [2]bool{true, false}

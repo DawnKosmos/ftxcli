@@ -44,7 +44,6 @@ func Parse(tl []Token) (Evaluater, error) {
 			if len(tl) == 1 {
 				return nil, errors.New("THE VARIABLE IS UNKNOWN " + tl[0].Text)
 			}
-
 			if tl[1].Type == ASSIGN {
 				err = ParseAssign(tl[0].Text, tl[2:])
 				return nil, err
@@ -54,7 +53,6 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 
 		if len(tl) > 2 {
-
 			if tl[1].Type == ASSIGN {
 				delete(vl, tl[0].Text)
 				err = ParseAssign(tl[0].Text, tl[2:])

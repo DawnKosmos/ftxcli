@@ -7,13 +7,9 @@ import (
 )
 
 /*
-also
-
-cancle || canceled all
-cancle btc-perp
-cancle buy
-cancle sell
-
+cancel all
+cancel buy btc-perp
+cancel sell btc-perp limit
 */
 
 type Cancel struct {
