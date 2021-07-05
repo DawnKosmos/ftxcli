@@ -1,7 +1,14 @@
 package ftx
 
+import (
+	"encoding/json"
+	"log"
+	"strconv"
+	"time"
+)
+
 type AccountResponse struct {
-	Success bool
+	Success bool    `json:"success"`
 	Result  Account `json:"result"`
 }
 
@@ -40,4 +47,108 @@ func (pr *Client) GetAccount() (Account, error) {
 	out.Positions = p
 
 	return out, nil
+}
+
+type GetWalletBalanceResponse struct {
+	Success bool   `json:"success"`
+	Result  []Coin `json:"result"`
+}
+
+type Coin struct {
+	Coin     string  `json:"coin,omitempty"`
+	Free     float64 `json:"free,omitempty"`
+	Total    float64 `json:"total,omitempty"`
+	UsdValue float64 `json:"usd_value,omitempty"`
+}
+
+func (f *Client) GetWalletBalance() ([]Coin, error) {
+	var ff GetWalletBalanceResponse
+	resp, err := f.get("account", []byte(""))
+	if err != nil {
+		return nil, err
+	}
+	err = processResponse(resp, &ff)
+
+	return ff.Result, err
+}
+
+type DepositHistoryResponse struct {
+	Success bool      `json:"success"`
+	Result  []Deposit `json:"result"`
+}
+
+type Deposit struct {
+	Coin   string    `json:"coin,omitempty"`
+	Fee    float64   `json:"fee,omitempty"`
+	Id     int       `json:"id,omitempty"`
+	Size   float64   `json:"size,omitempty"`
+	Status string    `json:"status,omitempty"`
+	Time   time.Time `json:"time,omitempty"`
+	Notes  string    `json:"notes,omitempty"`
+}
+
+func (f *Client) GetDepositHistory(st, et int64) ([]Deposit, error) {
+	var fr DepositHistoryResponse
+	resp, err := f.get(
+		"funding_rates?start_time="+strconv.FormatInt(st, 10)+
+			"&end_time="+strconv.FormatInt(et, 10),
+		[]byte(""))
+	if err != nil {
+		log.Println("ERROR OHCLV FTX", err)
+		return nil, err
+	}
+	err = processResponse(resp, &fr)
+	return fr.Result, err
+}
+
+func (f *Client) GetWithdrawHistory(st, et int64) ([]Deposit, error) {
+	var fr DepositHistoryResponse
+	resp, err := f.get(
+		"funding_rates?start_time="+strconv.FormatInt(st, 10)+
+			"&end_time="+strconv.FormatInt(et, 10),
+		[]byte(""))
+	if err != nil {
+		log.Println("ERROR OHCLV FTX", err)
+		return nil, err
+	}
+	err = processResponse(resp, &fr)
+	return fr.Result, err
+}
+
+type TransferPayload struct {
+	Coin        string  `json:"coin,omitempty"`
+	Size        float64 `json:"size,omitempty"`
+	Source      string  `json:"source,omitempty"`
+	Destination string  `json:"destination,omitempty"`
+}
+
+type TransferResponse struct {
+	Success bool `json:"success"`
+	Result  struct {
+		Id     int       `json:"id,omitempty"`
+		Coin   string    `json:"coin,omitempty"`
+		Size   float64   `json:"size,omitempty"`
+		Time   time.Time `json:"time,omitempty"`
+		Status string    `json:"status,omitempty"`
+	} `json:"result,omitempty"`
+}
+
+func (f *Client) TransferBetweenAccounts(Coin string, Size float64, src, destination string) (TransferResponse, error) {
+	var newOrderResponse TransferResponse
+	requestBody, err := json.Marshal(TransferPayload{
+		Coin:        Coin,
+		Size:        Size,
+		Source:      src,
+		Destination: destination})
+	if err != nil {
+		log.Printf("Error PlaceOrder %v", err)
+		return newOrderResponse, err
+	}
+	resp, err := f.post("orders", requestBody)
+	if err != nil {
+		log.Printf("Error PlaceOrder %v", err)
+		return newOrderResponse, err
+	}
+	err = processResponse(resp, &newOrderResponse)
+	return newOrderResponse, err
 }

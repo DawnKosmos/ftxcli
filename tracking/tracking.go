@@ -1,6 +1,10 @@
 package parser
 
-import "github.com/DawnKosmos/ftxcmd/ftx"
+import (
+	"time"
+
+	"github.com/DawnKosmos/ftxcmd/ftx"
+)
 
 /*
 Tracking soll alles was auf dem Account passiert tracken und in einer Datei speichern.
@@ -24,15 +28,32 @@ Ein webseite soll erstellt werden mit allen nützlichen informationen wenn gefor
 	Balance
 */
 
+type Month struct {
+	Accountname string
+	Data        []Day
+	Last        []Checked
+}
+
+type CheckType int
+
+const (
+	FILLS CheckType = iota
+	BALANCE
+	FUNDINGPAYMENTS
+	WITHDRAWDEPOSIT
+)
+
+type Checked struct {
+	Type CheckType `json:"type,omitempty"`
+	Time time.Time `json:"time,omitempty"`
+}
+
 type Day struct {
 	Day     int
-	Fills   []Fill
+	Fills   []ftx.Fill
 	FP      []ftx.FundingPayments
 	WD      []WithDrawsDeposits
 	Balance ftx.Account
-}
-
-type Fill struct {
 }
 
 type WithDrawsDeposits struct {
