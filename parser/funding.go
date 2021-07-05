@@ -24,7 +24,6 @@ type FundingType int
 const (
 	PAYMENTS FundingType = iota
 	POSITIONS
-	GENERAL
 )
 
 type Funding struct {
@@ -89,8 +88,6 @@ func (f *Funding) Evaluate(c *ftx.Client) (err error) {
 		err = EvaluatePayments(f, c)
 	case POSITIONS:
 		err = EvaluatePositions(f, c)
-	case GENERAL:
-		err = EvaluateGeneral(f, c)
 	}
 
 	return err
@@ -141,33 +138,6 @@ func EvaluatePositions(f *Funding, c *ftx.Client) error {
 	return err
 }
 
-func EvaluateGeneral(f *Funding, c *ftx.Client) error {
-	t := time.Now().Unix()
-	if len(f.Ticker) == 0 {
-		fp, err := c.GetFundingRates("", t, t)
-		if err != nil {
-			return err
-		}
-		PrintFunding(f.Summarize, fp)
-		return nil
-	}
-
-	var fpr [][]ftx.FundingRates
-
-	for _, v := range f.Ticker {
-		fp, err := c.GetFundingRates(v, t-f.Time, t)
-		if err != nil {
-			return err
-		}
-		fpr = append(fpr, fp)
-
-	}
-
-	PrintFunding(f.Summarize, fpr...)
-
-	return nil
-}
-
 // PRINT THE FUNCTIONS
 func PrintFundingPayments(summarize bool, fp ...[]ftx.FundingPayments) error {
 	for _, v := range fp {
@@ -175,25 +145,3 @@ func PrintFundingPayments(summarize bool, fp ...[]ftx.FundingPayments) error {
 	}
 	return nil
 }
-
-/*	mapfr := make(map[int64][]ftx.FundingRates)
-	for _, v := range fp {
-		for _, vv := range v {
-			fpr, ok := mapfr[vv.Time.Unix()]
-			if !ok {
-				mapfr[vv.Time.Unix()] = []ftx.FundingRates{vv}
-			} else {
-				fpr = append(fpr, vv)
-				mapfr[vv.Time.Unix()] = fpr
-			}
-		}
-	}
-
-	for k, v := range mapfr {
-		fmt.Print(k, " ")
-		for _, vv := range v {
-			fmt.Print(vv.Future, vv.Rate, " ")
-		}
-		fmt.Print("\n")
-	}
-	return nil*/

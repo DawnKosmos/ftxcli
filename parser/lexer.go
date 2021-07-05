@@ -57,6 +57,7 @@ const (
 	LBRACKET
 	RBRACKET
 	SOURCE
+	LOAD
 	CANCEL
 	FUNDING
 	POSITION
@@ -75,6 +76,9 @@ func Lexer(inputS string) (t []Token, err error) {
 
 	for _, s := range input {
 
+		if len(s) == 0 {
+			continue
+		}
 		last := len(s) - 1
 		switch s {
 		case "buy", "Buy":
@@ -99,6 +103,8 @@ func Lexer(inputS string) (t []Token, err error) {
 			t = append(t, Token{POSITION, ""})
 		case "fundingrates":
 			t = append(t, Token{FUNDINGRATES, ""})
+		case "load":
+			t = append(t, Token{LOAD, ""})
 		default:
 			if (s[last] == 'h' || s[last] == 'm' || s[last] == 'd') && len(s) > 1 {
 				_, err := strconv.Atoi(s[:last])
@@ -250,6 +256,9 @@ func (t TokenType) String() string {
 		s = "funding"
 	case POSITION:
 		s = "position"
+	case LOAD:
+		s = "LOAD"
 	}
+
 	return s
 }

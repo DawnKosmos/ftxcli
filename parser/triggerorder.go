@@ -8,7 +8,7 @@ import (
 	"github.com/DawnKosmos/ftxcmd/ftx"
 )
 
-//stop buy btc-perp [position, u100,0.1] -low 5h
+//stop buy btc-perp [position, u100,0.1] -low 5h 5%
 
 type TriggerOrder struct {
 	Side   string
@@ -23,8 +23,8 @@ type TriggerOrder struct {
 }
 
 func ParseStop(side string, tl []Token) (*TriggerOrder, error) {
-	if len(tl) == 0 {
-
+	if len(tl) < 2 {
+		return nil, errors.New("Arguments missing for a Stop order")
 	}
 	var tOrder TriggerOrder
 	tOrder.Side = side
@@ -108,7 +108,7 @@ func ParseStop(side string, tl []Token) (*TriggerOrder, error) {
 		return &tOrder, errors.New(tl[0].Type.String() + "is not a correct Price with value" + tl[0].Text)
 	}
 
-	tOrder.Value, err = strconv.ParseFloat(tl[1].Text, 64)
+	tOrder.Value, err = strconv.ParseFloat(tl[0].Text, 64)
 	if err != nil {
 		return &tOrder, err
 	}

@@ -2,7 +2,6 @@ package parser
 
 import (
 	"errors"
-	"fmt"
 
 	"github.com/DawnKosmos/ftxcmd/ftx"
 )
@@ -65,8 +64,6 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 	}
 
-	fmt.Println(nl)
-
 	switch nl[0].Type {
 	case SIDE:
 		o, err := ParseOrder(nl[0].Text, nl[1:])
@@ -75,14 +72,14 @@ func Parse(tl []Token) (Evaluater, error) {
 		}
 		return o, nil
 	case STOP:
-		if nl[1].Type == VARIABLE {
+		if nl[1].Type == SIDE {
 			o, err := ParseStop(nl[1].Text, nl[2:])
 			if err != nil {
 				return nil, err
 			}
 			return o, nil
 		}
-		return nil, errors.New("After A Stop a ticker has to follow")
+		return nil, errors.New("After A stop a buy/sell has to follow")
 	case CANCEL:
 		o, err := ParseCancel(nl)
 		if err != nil {
@@ -97,6 +94,12 @@ func Parse(tl []Token) (Evaluater, error) {
 		return o, nil
 	case FUNDINGRATES:
 		o, err := ParseFundingRates(nl[1:])
+		if err != nil {
+			return nil, err
+		}
+		return o, nil
+	case LOAD:
+		o, err := ParseLoad(nl[1:])
 		if err != nil {
 			return nil, err
 		}

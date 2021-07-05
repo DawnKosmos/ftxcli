@@ -28,6 +28,9 @@ type Price struct {
 }
 
 func ParsePrice(tl []Token) (p Price, err error) {
+	if len(tl) == 0 {
+		return p, errors.New("An order needs arguments")
+	}
 
 	p.PC = "market"
 	if tl[0].Type == SOURCE {
@@ -41,7 +44,7 @@ func ParsePrice(tl []Token) (p Price, err error) {
 			return p, errors.New(tl[0].Type.String() + "This Source does not exist with value" + tl[0].Text)
 		}
 
-		if tl[1].Type != DURATION {
+		if len(tl) < 2 || tl[1].Type != DURATION {
 			return p, errors.New("After -low, -high you need to provide a duration")
 		}
 

@@ -15,21 +15,26 @@ import (
 func Start(e ...interface{}) {
 	fmt.Print("Welcome, write name of acc file to import the keys\n>")
 	reader := bufio.NewReader(os.Stdin)
-
+ReadAcc:
 	acc, _ := reader.ReadString('\n')
-
 	acc = acc[:len(acc)-2]
-
 	data, err := ioutil.ReadFile(acc)
 	if err != nil {
-		fmt.Println("File reading error", err)
-		return
+		fmt.Println("File does not exist", err)
+		goto ReadAcc
 	}
 
 	s := strings.Split(string(data), " ")
 	c := &http.Client{}
 
 	f := ftx.NewClient(c, s[1], s[2], s[0])
+	a, err := f.GetAccount()
+	if err != nil {
+		fmt.Println("Account Verification failed", err)
+		return
+	}
+
+	fmt.Println(a.Username, " Account Value:", a.TotalAccountValue, " Amount of Positions:", len(a.Positions))
 
 	for {
 		fmt.Print("> ")
@@ -46,7 +51,7 @@ func Start(e ...interface{}) {
 				fmt.Println(err)
 				continue
 			}
-			fmt.Println("Variable assigned")
+			fmt.Println(t[0].Text, "Variable assigned")
 			continue
 		}
 
@@ -58,8 +63,4 @@ func Start(e ...interface{}) {
 		fmt.Println("SUCCESS")
 	}
 
-}
-
-func evaluate(s string) {
-	//lex :=
 }

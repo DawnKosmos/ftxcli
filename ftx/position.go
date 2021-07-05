@@ -1,5 +1,7 @@
 package ftx
 
+import "time"
+
 type PositionsResponse struct {
 	Success bool       `json:"success"`
 	Result  []Position `json:"result"`
@@ -32,4 +34,36 @@ func (f *Client) GetPosition() ([]Position, error) {
 	}
 
 	return out, err
+}
+
+type FillResponse struct {
+	Success bool   `json:"success"`
+	Result  []Fill `json:"result"`
+}
+
+type Fill struct {
+	Fee         float64   `json:"fee,omitempty"`
+	FeeCurrency string    `json:"fee_currency,omitempty"`
+	Future      string    `json:"future,omitempty"`
+	Id          int       `json:"id,omitempty"`
+	OrderId     int       `json:"order_id,omitempty"`
+	TradeId     int       `json:"trade_id,omitempty"`
+	Price       float64   `json:"price,omitempty"`
+	Side        string    `json:"side,omitempty"`
+	Size        float64   `json:"size,omitempty"`
+	Time        time.Time `json:"time,omitempty"`
+}
+
+func (f *Client) GetFills() ([]Fill, error) {
+	var fills FillResponse
+
+	var out []Fill
+
+	resp, err := f.get("fills", []byte(""))
+	if err != nil {
+		return out, err
+	}
+	err = processResponse(resp, &fills)
+
+	return fills.Result, err
 }

@@ -27,7 +27,7 @@ func (f *Client) GetFundingPayments(ticker string, st, et int64) ([]FundingPayme
 	}
 
 	resp, err := f.get(
-		"funding_payments/"+s+
+		"funding_payments"+s+
 			"start_time="+strconv.FormatInt(st, 10)+
 			"&end_time="+strconv.FormatInt(et, 10),
 		[]byte(""))
