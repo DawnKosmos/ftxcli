@@ -87,6 +87,8 @@ type Deposit struct {
 	Notes  string    `json:"notes,omitempty"`
 }
 
+type Withdraw Deposit
+
 func (f *Client) GetDepositHistory(st, et int64) ([]Deposit, error) {
 	var fr DepositHistoryResponse
 	resp, err := f.get(
@@ -101,7 +103,7 @@ func (f *Client) GetDepositHistory(st, et int64) ([]Deposit, error) {
 	return fr.Result, err
 }
 
-func (f *Client) GetWithdrawHistory(st, et int64) ([]Deposit, error) {
+func (f *Client) GetWithdrawHistory(st, et int64) ([]Withdraw, error) {
 	var fr DepositHistoryResponse
 	resp, err := f.get(
 		"funding_rates?start_time="+strconv.FormatInt(st, 10)+
@@ -112,7 +114,13 @@ func (f *Client) GetWithdrawHistory(st, et int64) ([]Deposit, error) {
 		return nil, err
 	}
 	err = processResponse(resp, &fr)
-	return fr.Result, err
+	var out []Withdraw
+
+	for _, v := range fr.Result {
+		out = append(out, Withdraw(v))
+	}
+
+	return out, err
 }
 
 type TransferPayload struct {

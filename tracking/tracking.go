@@ -1,4 +1,4 @@
-package parser
+package tracking
 
 import (
 	"time"
@@ -28,12 +28,6 @@ Ein webseite soll erstellt werden mit allen nützlichen informationen wenn gefor
 	Balance
 */
 
-type Month struct {
-	Accountname string
-	Data        []Day
-	Last        []Checked
-}
-
 type CheckType int
 
 const (
@@ -49,15 +43,36 @@ type Checked struct {
 }
 
 type Day struct {
-	Day     int
-	Fills   []ftx.Fill
-	FP      []ftx.FundingPayments
-	WD      []WithDrawsDeposits
-	Balance ftx.Account
+	Day     int               `json:"day,omitempty"`
+	Fills   Fills             `json:"fills,omitempty"`
+	FP      FundingPayment    `json:"fp,omitempty"`
+	WD      WithdrawsDeposits `json:"wd,omitempty"`
+	Balance []AccountBalance  `json:"balance,omitempty"`
 }
 
-type WithDrawsDeposits struct {
+type FundingPayment struct {
+	Data        []ftx.FundingPayments `json:"data,omitempty"`
+	LastChecked Checked               `json:"last_checked,omitempty"`
 }
 
-type Balance struct {
+type AccountBalance struct {
+	Data        []Account `json:"data,omitempty"`
+	LastChecked Checked   `json:"last_checked,omitempty"`
+}
+
+type Account struct {
+	Total float64    `json:"total,omitempty"`
+	Coins []ftx.Coin `json:"coins,omitempty"`
+	Time  time.Time  `json:"time,omitempty"`
+}
+
+type WithdrawsDeposits struct {
+	Deposits    []ftx.Deposit  `json:"deposits,omitempty"`
+	Withdraws   []ftx.Withdraw `json:"withdraws,omitempty"`
+	LastChecked Checked        `json:"last_checked,omitempty"`
+}
+
+type Fills struct {
+	Data        []ftx.Fill `json:"data,omitempty"`
+	LastChecked Checked    `json:"last_checked,omitempty"`
 }
