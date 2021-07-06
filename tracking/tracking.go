@@ -37,6 +37,13 @@ const (
 	WITHDRAWDEPOSIT
 )
 
+type Tracker struct {
+	Username    string    `json:"username,omitempty"`
+	Month       string    `json:"month,omitempty"`
+	Date        []Day     `json:"date,omitempty"`
+	LastChecked []Checked `json:"last_checked,omitempty"`
+}
+
 type Checked struct {
 	Type CheckType `json:"type,omitempty"`
 	Time time.Time `json:"time,omitempty"`
@@ -51,28 +58,24 @@ type Day struct {
 }
 
 type FundingPayment struct {
-	Data        []ftx.FundingPayments `json:"data,omitempty"`
-	LastChecked Checked               `json:"last_checked,omitempty"`
+	Data []ftx.FundingPayments `json:"data,omitempty"`
 }
 
 type AccountBalance struct {
-	Data        []Account `json:"data,omitempty"`
-	LastChecked Checked   `json:"last_checked,omitempty"`
+	Data []AccountSnapshot `json:"data,omitempty"`
 }
 
-type Account struct {
+type AccountSnapshot struct {
 	Total float64    `json:"total,omitempty"`
 	Coins []ftx.Coin `json:"coins,omitempty"`
 	Time  time.Time  `json:"time,omitempty"`
 }
 
 type WithdrawsDeposits struct {
-	Deposits    []ftx.Deposit  `json:"deposits,omitempty"`
-	Withdraws   []ftx.Withdraw `json:"withdraws,omitempty"`
-	LastChecked Checked        `json:"last_checked,omitempty"`
+	Deposits  []ftx.Deposit  `json:"deposits,omitempty"`
+	Withdraws []ftx.Withdraw `json:"withdraws,omitempty"`
 }
 
 type Fills struct {
-	Data        []ftx.Fill `json:"data,omitempty"`
-	LastChecked Checked    `json:"last_checked,omitempty"`
+	Data []ftx.Fill `json:"data,omitempty"`
 }
