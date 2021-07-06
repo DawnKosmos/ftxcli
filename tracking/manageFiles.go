@@ -3,17 +3,28 @@ package tracking
 import (
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"log"
 	"os"
 	"strconv"
 	"time"
 )
 
+var ttt *Tracker
+
 func init() {
 	t := time.Now()
 	y, m, _ := t.Date()
 	//checkFolder
 	var err error
+
+	if _, err = os.Stat("log/"); os.IsNotExist(err) {
+		err := os.Mkdir("log/", 0755)
+		if err != nil {
+			log.Fatal(err)
+		}
+	}
+
 	if _, err = os.Stat("log/" + strconv.Itoa(y)); os.IsNotExist(err) {
 
 		err := os.Mkdir("log/"+strconv.Itoa(y), 0755)
@@ -26,6 +37,7 @@ func init() {
 	FileName := "log/" + strconv.Itoa(y) + "/" + m.String() + ".log"
 	if _, err := os.Stat(FileName); os.IsNotExist(err) {
 		emptyFile, err := os.Create(FileName)
+		defer emptyFile.Close()
 		if err != nil {
 			log.Fatal(err)
 		}
@@ -35,6 +47,22 @@ func init() {
 			fmt.Println(err)
 		}
 	}
+	//Load month
+
+	ttt = &Tracker{}
+
+	data, err := ioutil.ReadFile(FileName)
+	if err != nil {
+		fmt.Println("File to track account haven't been found")
+		return
+	}
+
+	err = json.Unmarshal(data, ttt)
+	if err != nil {
+		fmt.Println("File to track account haven't been found")
+		return
+	}
+
 }
 
 func FillFile(f *os.File, m time.Month, t *Tracker) error {

@@ -1,6 +1,9 @@
 package ftx
 
-import "time"
+import (
+	"strconv"
+	"time"
+)
 
 type PositionsResponse struct {
 	Success bool       `json:"success"`
@@ -54,12 +57,13 @@ type Fill struct {
 	Time        time.Time `json:"time,omitempty"`
 }
 
-func (f *Client) GetFills() ([]Fill, error) {
+func (f *Client) GetFills(st, et int64) ([]Fill, error) {
 	var fills FillResponse
 
 	var out []Fill
 
-	resp, err := f.get("fills", []byte(""))
+	resp, err := f.get("fills?start_time="+strconv.FormatInt(st, 10)+
+		"&end_time="+strconv.FormatInt(et, 10), []byte(""))
 	if err != nil {
 		return out, err
 	}

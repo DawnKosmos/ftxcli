@@ -1,6 +1,8 @@
 package tracking
 
 import (
+	"errors"
+	"fmt"
 	"time"
 
 	"github.com/DawnKosmos/ftxcmd/ftx"
@@ -50,7 +52,9 @@ type Checked struct {
 }
 
 type Day struct {
-	Day     int               `json:"day,omitempty"`
+	Day     int `json:"day,omitempty"`
+	Month   time.Month
+	Year    int
 	Fills   Fills             `json:"fills,omitempty"`
 	FP      FundingPayment    `json:"fp,omitempty"`
 	WD      WithdrawsDeposits `json:"wd,omitempty"`
@@ -78,4 +82,38 @@ type WithdrawsDeposits struct {
 
 type Fills struct {
 	Data []ftx.Fill `json:"data,omitempty"`
+}
+
+func (f Fills) Add(v ftx.Fill) {
+	f.Data = append(f.Data, v)
+}
+
+func (t *Tracker) Fill(f *ftx.Client, stt, ett time.Time) error {
+	if stt.Month() != stt.Month() {
+		return errors.New("Start Month and End Month aren't the same")
+	}
+	wb, err := f.GetWalletBalance()
+	if err != nil {
+		return err
+	}
+
+	st, et := stt.Unix(), ett.Unix()
+
+	var total float64
+	for _, v := range wb {
+		total += v.UsdValue
+	}
+	fmt.Println(total)
+
+	fills, err := f.GetFills(st, et)
+	if err != nil {
+		return err
+	}
+
+	for _, v := range fills {
+		i := v.Time.Day()
+		t.Date[i-1].Fills.Add(v)
+	}
+
+	return nil
 }
