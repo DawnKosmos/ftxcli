@@ -42,7 +42,7 @@ func init() {
 			log.Fatal(err)
 		}
 		var t Tracker
-		err = FillFile(emptyFile, m, &t)
+		err = FillFile(emptyFile, m, y, &t)
 		if err != nil {
 			fmt.Println(err)
 		}
@@ -65,7 +65,7 @@ func init() {
 
 }
 
-func FillFile(f *os.File, m time.Month, t *Tracker) error {
+func FillFile(f *os.File, m time.Month, year int, t *Tracker) error {
 	t.Month = m.String()
 	for i := 1; i < 32; i++ {
 		t.Date = append(t.Date, Day{Day: i})

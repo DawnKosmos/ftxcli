@@ -2,7 +2,6 @@ package tracking
 
 import (
 	"errors"
-	"fmt"
 	"time"
 
 	"github.com/DawnKosmos/ftxcmd/ftx"
@@ -33,17 +32,19 @@ Ein webseite soll erstellt werden mit allen nützlichen informationen wenn gefor
 type CheckType int
 
 const (
-	FILLS CheckType = iota
+	ALL CheckType = iota
+	FILLS
 	BALANCE
 	FUNDINGPAYMENTS
 	WITHDRAWDEPOSIT
 )
 
 type Tracker struct {
-	Username    string    `json:"username,omitempty"`
-	Month       string    `json:"month,omitempty"`
-	Date        []Day     `json:"date,omitempty"`
-	LastChecked []Checked `json:"last_checked,omitempty"`
+	Username    string     `json:"username,omitempty"`
+	Month       string     `json:"month,omitempty"`
+	Year        int        `json:"year,omitempty"`
+	Date        []Day      `json:"date,omitempty"`
+	LastChecked [5]Checked `json:"last_checked,omitempty"`
 }
 
 type Checked struct {
@@ -52,59 +53,33 @@ type Checked struct {
 }
 
 type Day struct {
-	Day     int `json:"day,omitempty"`
-	Month   time.Month
-	Year    int
+	Day     int               `json:"day,omitempty"`
 	Fills   Fills             `json:"fills,omitempty"`
 	FP      FundingPayment    `json:"fp,omitempty"`
 	WD      WithdrawsDeposits `json:"wd,omitempty"`
-	Balance []AccountBalance  `json:"balance,omitempty"`
-}
-
-type FundingPayment struct {
-	Data []ftx.FundingPayments `json:"data,omitempty"`
-}
-
-type AccountBalance struct {
-	Data []AccountSnapshot `json:"data,omitempty"`
-}
-
-type AccountSnapshot struct {
-	Total float64    `json:"total,omitempty"`
-	Coins []ftx.Coin `json:"coins,omitempty"`
-	Time  time.Time  `json:"time,omitempty"`
-}
-
-type WithdrawsDeposits struct {
-	Deposits  []ftx.Deposit  `json:"deposits,omitempty"`
-	Withdraws []ftx.Withdraw `json:"withdraws,omitempty"`
-}
-
-type Fills struct {
-	Data []ftx.Fill `json:"data,omitempty"`
-}
-
-func (f Fills) Add(v ftx.Fill) {
-	f.Data = append(f.Data, v)
+	Balance AccountBalance    `json:"balance,omitempty"`
 }
 
 func (t *Tracker) Fill(f *ftx.Client, stt, ett time.Time) error {
+	st, et := stt.Unix(), ett.Unix()
+	todayDay := time.Now().Day()
 	if stt.Month() != stt.Month() {
 		return errors.New("Start Month and End Month aren't the same")
 	}
+
+	if f.Subaccount == "" {
+		t.Username = "main"
+	} else {
+		t.Username = f.Subaccount
+	}
+
+	//Get Total Wallet Balance
 	wb, err := f.GetWalletBalance()
 	if err != nil {
 		return err
 	}
-
-	st, et := stt.Unix(), ett.Unix()
-
-	var total float64
-	for _, v := range wb {
-		total += v.UsdValue
-	}
-	fmt.Println(total)
-
+	t.Date[todayDay-1].Balance.Add(wb)
+	//Get Fills
 	fills, err := f.GetFills(st, et)
 	if err != nil {
 		return err
@@ -114,6 +89,30 @@ func (t *Tracker) Fill(f *ftx.Client, stt, ett time.Time) error {
 		i := v.Time.Day()
 		t.Date[i-1].Fills.Add(v)
 	}
+	//withdraw deposits
+	withdraws, err := f.GetWithdrawHistory(st, et)
+	if err != nil {
+		return err
+	}
+	deposits, err := f.GetDepositHistory(st, et)
+	if err != nil {
+		return err
+	}
+	for _, v := range withdraws {
+		i := v.Time.Day()
+		t.Date[i-1].WD.AddWithdraw(v)
+	}
+	for _, v := range deposits {
+		i := v.Time.Day()
+		t.Date[i-1].WD.AddDeposit(v)
+	}
+	//Fundingpayments
+	fp, err := f.GetFundingPayments("", st, et)
+	for _, v := range fp {
+		i := v.Time.Day()
+		t.Date[i-1].FP.Add(v)
+	}
 
+	t.LastChecked[ALL] = Checked{ALL, time.Now()}
 	return nil
 }

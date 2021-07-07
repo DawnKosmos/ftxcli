@@ -46,11 +46,10 @@ type FillResponse struct {
 
 type Fill struct {
 	Fee         float64   `json:"fee,omitempty"`
-	FeeCurrency string    `json:"fee_currency,omitempty"`
+	FeeCurrency string    `json:"feeCurrency,omitempty"`
 	Future      string    `json:"future,omitempty"`
 	Id          int       `json:"id,omitempty"`
-	OrderId     int       `json:"order_id,omitempty"`
-	TradeId     int       `json:"trade_id,omitempty"`
+	OrderId     int       `json:"orderId,omitempty"`
 	Price       float64   `json:"price,omitempty"`
 	Side        string    `json:"side,omitempty"`
 	Size        float64   `json:"size,omitempty"`

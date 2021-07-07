@@ -22,16 +22,7 @@ func TestAmount(t *testing.T) {
 	c := &http.Client{}
 
 	f := ftx.NewClient(c, s[1], s[2], s[0])
-
-	b, err := f.GetFills()
-	if err != nil {
-		fmt.Println(err)
-		t.Fail()
-	}
-	for _, v := range b {
-		fmt.Println(v)
-
-	}
+	fmt.Println(f.Subaccount)
 }
 
 /*

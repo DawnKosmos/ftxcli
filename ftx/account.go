@@ -58,18 +58,23 @@ type Coin struct {
 	Coin     string  `json:"coin,omitempty"`
 	Free     float64 `json:"free,omitempty"`
 	Total    float64 `json:"total,omitempty"`
-	UsdValue float64 `json:"usd_value,omitempty"`
+	UsdValue float64 `json:"usdValue,omitempty"`
 }
 
 func (f *Client) GetWalletBalance() ([]Coin, error) {
 	var ff GetWalletBalanceResponse
-	resp, err := f.get("account", []byte(""))
+	resp, err := f.get("wallet/balances", []byte(""))
 	if err != nil {
 		return nil, err
 	}
 	err = processResponse(resp, &ff)
-
-	return ff.Result, err
+	var out []Coin
+	for _, v := range ff.Result {
+		if v.UsdValue > 1 {
+			out = append(out, v)
+		}
+	}
+	return out, err
 }
 
 type DepositHistoryResponse struct {
@@ -92,7 +97,7 @@ type Withdraw Deposit
 func (f *Client) GetDepositHistory(st, et int64) ([]Deposit, error) {
 	var fr DepositHistoryResponse
 	resp, err := f.get(
-		"funding_rates?start_time="+strconv.FormatInt(st, 10)+
+		"wallet/deposits?start_time="+strconv.FormatInt(st, 10)+
 			"&end_time="+strconv.FormatInt(et, 10),
 		[]byte(""))
 	if err != nil {
@@ -106,7 +111,7 @@ func (f *Client) GetDepositHistory(st, et int64) ([]Deposit, error) {
 func (f *Client) GetWithdrawHistory(st, et int64) ([]Withdraw, error) {
 	var fr DepositHistoryResponse
 	resp, err := f.get(
-		"funding_rates?start_time="+strconv.FormatInt(st, 10)+
+		"wallet/withdrawals?start_time="+strconv.FormatInt(st, 10)+
 			"&end_time="+strconv.FormatInt(et, 10),
 		[]byte(""))
 	if err != nil {
@@ -115,11 +120,6 @@ func (f *Client) GetWithdrawHistory(st, et int64) ([]Withdraw, error) {
 	}
 	err = processResponse(resp, &fr)
 	var out []Withdraw
-
-	for _, v := range fr.Result {
-		out = append(out, Withdraw(v))
-	}
-
 	return out, err
 }
 
