@@ -97,7 +97,7 @@ func Lexer(inputS string) (t []Token, err error) {
 			t = append(t, Token{RBRACKET, ""})
 		case "cancel":
 			t = append(t, Token{CANCEL, "cancel"})
-		case "funding":
+		case "fundingpay":
 			t = append(t, Token{FUNDING, "fundus"})
 		case "position":
 			t = append(t, Token{POSITION, ""})

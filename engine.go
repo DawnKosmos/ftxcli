@@ -27,7 +27,8 @@ ReadAcc:
 	s := strings.Split(string(data), " ")
 	c := &http.Client{}
 
-	f := ftx.NewClient(c, s[1], s[2], s[0])
+	fmt.Println(s)
+	f := ftx.NewClient(c, s[1], s[2], "")
 	a, err := f.GetAccount()
 	if err != nil {
 		fmt.Println("Account Verification failed", err)
