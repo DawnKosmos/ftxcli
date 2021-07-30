@@ -83,7 +83,7 @@ func (f *FundingRates) Evaluate(c *ftx.Client, ws *WsAccount) (err error) {
 		if err != nil {
 			return err
 		}
-		PrintFunding(f.Summarize, fp)
+		PrintFunding(f.Summarize, ws, fp)
 		return nil
 	}
 
@@ -98,11 +98,11 @@ func (f *FundingRates) Evaluate(c *ftx.Client, ws *WsAccount) (err error) {
 
 	}
 
-	PrintFunding(f.Summarize, fpr...)
+	PrintFunding(f.Summarize, ws, fpr...)
 	return nil
 }
 
-func PrintFunding(summarize bool, fp ...[]ftx.FundingRates) {
+func PrintFunding(summarize bool, ws *WsAccount, fp ...[]ftx.FundingRates) {
 	printfr := make([][]ftx.FundingRates, len(fp[0]))
 	for i, v := range fp[0] {
 		printfr[i] = []ftx.FundingRates{v}
@@ -116,10 +116,17 @@ func PrintFunding(summarize bool, fp ...[]ftx.FundingRates) {
 			}
 		}
 	}
-	fmt.Print("Ticker: \t")
 
+	var s string
 	for _, v := range printfr[0] {
-		fmt.Print(v.Future, " ")
+		s += v.Future + "  "
+	}
+
+	if ws == nil {
+		fmt.Print("Ticker: \t", s)
+	} else {
+		ws.AddToBuffer("Ticker: \t")
+		ws.Write(s)
 	}
 
 	if summarize {
@@ -131,23 +138,42 @@ func PrintFunding(summarize bool, fp ...[]ftx.FundingRates) {
 			}
 		}
 
-		fmt.Print("\nSummarized\t")
-		for _, v := range ff {
-			ss := fmt.Sprintf("%.4f", float64(v*100))
-			fmt.Print(ss, "\t")
+		if ws == nil {
+
+			fmt.Print("\nSummarized\t")
+			for _, v := range ff {
+				ss := fmt.Sprintf("%.4f", float64(v*100))
+				fmt.Print(ss, "\t")
+			}
+		} else {
+			ws.AddToBuffer("Summarized\t")
+			for _, v := range ff {
+				ss := fmt.Sprintf("%.4f\t", float64(v*100))
+				ws.AddToBuffer(ss)
+			}
+			ws.Write("")
 		}
 		return
 	}
 
-	fmt.Print("\n")
-	for _, v := range printfr {
-		fmt.Print(v[0].Time.Format("02.07.06 15"), "\t")
-		for _, vv := range v {
-			ff := fmt.Sprintf("%.4f", float64(vv.Rate*100))
-			fmt.Print(ff, "\t")
-		}
+	if ws == nil {
 		fmt.Print("\n")
+		for _, v := range printfr {
+			fmt.Print(v[0].Time.Format("02.07.06 15"), "\t")
+			for _, vv := range v {
+				ff := fmt.Sprintf("%.4f", float64(vv.Rate*100))
+				fmt.Print(ff, "\t")
+			}
+			fmt.Print("\n")
+		}
+	} else {
+		for _, v := range printfr {
+			ws.AddToBuffer(v[0].Time.Format("02.07.06 15") + "\t")
+			for _, vv := range v {
+				ff := fmt.Sprintf("%.4f", float64(vv.Rate*100))
+				ws.AddToBuffer(ff + "\t")
+			}
+			ws.Write("")
+		}
 	}
-
-	return
 }

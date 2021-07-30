@@ -88,18 +88,19 @@ func WsStart(wsc *websocket.Conn, name, public, secret string) {
 	for {
 		_, msg, err := wsc.ReadMessage()
 		if err != nil {
-			fmt.Println(err)
+			ws.Write(err.Error())
+			continue
 		}
 
 		t, err := parser.Lexer(string(msg))
 		if err != nil {
-			fmt.Println(err)
+			ws.Write(err.Error())
 			continue
 		}
 		p, err := parser.Parse(t, ws)
 		if p == nil {
 			if err != nil {
-				fmt.Println(err)
+				ws.Write(err.Error())
 				continue
 			}
 			ws.Write("Variable assigned: " + t[0].Text)
