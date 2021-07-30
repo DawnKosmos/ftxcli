@@ -47,7 +47,7 @@ func ParseCancel(tl []Token) (*Cancel, error) {
 	return &cancle, nil
 }
 
-func (c *Cancel) Evaluate(f *ftx.Client) error {
+func (c *Cancel) Evaluate(f *ftx.Client, ws *WsAccount) error {
 	if len(c.Ticker) == 0 {
 		_, err := f.DeleteOrders("", c.so, c.lo)
 		return err

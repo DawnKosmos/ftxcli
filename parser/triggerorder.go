@@ -124,7 +124,7 @@ func ParseStop(side string, tl []Token) (*TriggerOrder, error) {
 	return &tOrder, nil
 }
 
-func (t *TriggerOrder) Evaluate(f *ftx.Client) error {
+func (t *TriggerOrder) Evaluate(f *ftx.Client, ws *WsAccount) error {
 	size, err := t.Amount.Evaluate(f, t.Ticker)
 	if err != nil {
 		return err
@@ -160,7 +160,12 @@ func (t *TriggerOrder) Evaluate(f *ftx.Client) error {
 	if err != nil {
 		return err
 	}
-	fmt.Println(p.Result.Side, p.Result.Size, p.Result.OrderPrice)
 
+	if ws == nil {
+		fmt.Println(p.Result.Side, p.Result.Size, p.Result.OrderPrice)
+	} else {
+		s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.OrderPrice)
+		ws.Write(s)
+	}
 	return nil
 }

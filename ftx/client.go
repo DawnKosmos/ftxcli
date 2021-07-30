@@ -85,3 +85,26 @@ func (client *Client) delete(path string, body []byte) (*http.Response, error) {
 	resp, err := client.Client.Do(preparedRequest)
 	return resp, err
 }
+
+type CL struct {
+	Leverage int `json:"leverage"`
+}
+
+func (c *Client) ChangeLev(lev int) (Response, error) {
+	var s Response
+	requestBody, err := json.Marshal(CL{
+		Leverage: lev,
+	})
+	if err != nil {
+		log.Printf("Error PlaceOrder %v", err)
+		return s, err
+	}
+	resp, err := c.post("account/leverage", requestBody)
+
+	if err != nil {
+		log.Printf("Error PlaceTriggerOrder %v", err)
+		return s, err
+	}
+	err = processResponse(resp, &s)
+	return s, err
+}

@@ -34,7 +34,7 @@ func ParseLoad(tl []Token) (*Load, error) {
 	return l, nil
 }
 
-func (l *Load) Evaluate(f *ftx.Client) error {
+func (l *Load) Evaluate(f *ftx.Client, ws *WsAccount) error {
 	if len(l.FileName) == 0 {
 		return errors.New("no valid filenames")
 	}
@@ -62,7 +62,7 @@ func (l *Load) Evaluate(f *ftx.Client) error {
 				continue
 			}
 
-			parsed, err := Parse(ss)
+			parsed, err := Parse(ss, ws)
 			if parsed != nil {
 				fmt.Println("file", i, " line", j, " not assignmed")
 			}

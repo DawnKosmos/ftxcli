@@ -66,7 +66,7 @@ func ParseOrder(Side string, tl []Token) (*Order, error) {
 }
 
 //Evaluate the ordersize and prices
-func (o *Order) Evaluate(f *ftx.Client) error {
+func (o *Order) Evaluate(f *ftx.Client, ws *WsAccount) error {
 	//We first get the amount evaluate, it depends on the type of amount and price source, low, high or market
 	size, err := o.A.Evaluate(f, o.Ticker)
 	if err != nil {
@@ -74,6 +74,6 @@ func (o *Order) Evaluate(f *ftx.Client) error {
 	}
 
 	//the price get evaluation also places the orders
-	err = o.P.Evaluate(f, o.Side, o.Ticker, size)
+	err = o.P.Evaluate(f, o.Side, o.Ticker, size, ws)
 	return err
 }

@@ -153,7 +153,7 @@ func ParsePriceFlag(tl []Token, p *Price, flag string) (err error) {
 	return nil
 }
 
-func (p *Price) Evaluate(f *ftx.Client, side string, ticker string, size float64) (err error) {
+func (p *Price) Evaluate(f *ftx.Client, side string, ticker string, size float64, ws *WsAccount) (err error) {
 	var mp float64
 	if p.PC == "market" {
 		m, err := f.GetMarket(ticker)
@@ -167,20 +167,28 @@ func (p *Price) Evaluate(f *ftx.Client, side string, ticker string, size float64
 
 	switch p.Type {
 	case PRICE:
-		err = p.EvaluatePrice(f, side, ticker, size, mp)
+		err = p.EvaluatePrice(f, side, ticker, size, mp, ws)
 	case DIFFERENCE:
-		err = p.EvaluateDifference(f, side, ticker, size, mp)
+		err = p.EvaluateDifference(f, side, ticker, size, mp, ws)
 	case PERCENTPRICE:
-		err = p.EvaluatePercentual(f, side, ticker, size, mp)
+		err = p.EvaluatePercentual(f, side, ticker, size, mp, ws)
 	}
 
 	return err
 }
 
-func (p *Price) EvaluatePrice(f *ftx.Client, side string, ticker string, size float64, mp float64) error {
-
+func (p *Price) EvaluatePrice(f *ftx.Client, side string, ticker string, size float64, mp float64, ws *WsAccount) error {
 	if !p.IsLaddered[0] {
-		_, err := f.SetOrder(ticker, side, p.Values[0], size, "limit", false)
+		p, err := f.SetOrder(ticker, side, p.Values[0], size, "limit", false)
+		if err != nil {
+			return err
+		}
+		if ws == nil {
+			fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+		} else {
+			s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.Price)
+			ws.Write(s)
+		}
 		return err
 	}
 
@@ -188,23 +196,38 @@ func (p *Price) EvaluatePrice(f *ftx.Client, side string, ticker string, size fl
 	plo := GetPricesLadderedOrder(p.IsLaddered[1], p.Values[0], p1, p2)
 
 	for _, v := range plo {
-		_, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
+		p, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
 		if err != nil {
 			return err
+		}
+		if ws == nil {
+			fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+		} else {
+			s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.Price)
+			ws.Write(s)
 		}
 	}
 
 	return nil
 }
 
-func (p *Price) EvaluateDifference(f *ftx.Client, side string, ticker string, size float64, mp float64) error {
+func (p *Price) EvaluateDifference(f *ftx.Client, side string, ticker string, size float64, mp float64, ws *WsAccount) error {
 	factor := 1.0
 	if side == "sell" {
 		factor = -1.0
 	}
 
 	if !p.IsLaddered[0] {
-		_, err := f.SetOrder(ticker, side, mp-p.Values[0]*factor, size, "limit", false)
+		p, err := f.SetOrder(ticker, side, mp-p.Values[0]*factor, size, "limit", false)
+		if err != nil {
+			return err
+		}
+		if ws == nil {
+			fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+		} else {
+			s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.Price)
+			ws.Write(s)
+		}
 		return err
 	}
 
@@ -212,16 +235,22 @@ func (p *Price) EvaluateDifference(f *ftx.Client, side string, ticker string, si
 	plo := GetPricesLadderedOrder(p.IsLaddered[1], p.Values[0], p1, p2)
 
 	for _, v := range plo {
-		_, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
+		p, err := f.SetOrder(ticker, side, v[0], size*v[1], "limit", false)
 		if err != nil {
 			return err
+		}
+		if ws == nil {
+			fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+		} else {
+			s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.Price)
+			ws.Write(s)
 		}
 	}
 
 	return nil
 }
 
-func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, size float64, mp float64) error {
+func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, size float64, mp float64, ws *WsAccount) error {
 	factor := 1.0
 	if side == "sell" {
 		factor = -1.0
@@ -229,7 +258,16 @@ func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, si
 	//var err error
 
 	if !p.IsLaddered[0] {
-		_, err := f.SetOrder(ticker, side, mp-mp*p.Values[0]/100*factor, size, "limit", false)
+		p, err := f.SetOrder(ticker, side, mp-mp*p.Values[0]/100*factor, size, "limit", false)
+		if err != nil {
+			return err
+		}
+		if ws == nil {
+			fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+		} else {
+			s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.Price)
+			ws.Write(s)
+		}
 		return err
 	}
 
@@ -242,8 +280,12 @@ func (p *Price) EvaluatePercentual(f *ftx.Client, side string, ticker string, si
 		if err != nil {
 			return err
 		}
-		fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
-
+		if ws == nil {
+			fmt.Println(p.Result.Side, p.Result.Size, p.Result.Price)
+		} else {
+			s := fmt.Sprintf("Placed: %s %f %f ", p.Result.Side, p.Result.Size, p.Result.Price)
+			ws.Write(s)
+		}
 	}
 
 	return nil

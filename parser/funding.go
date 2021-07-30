@@ -2,6 +2,7 @@ package parser
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 	"time"
 
@@ -73,25 +74,50 @@ func ParseFunding(tl []Token) (*Funding, error) {
 	General: sowing funding of coins, sum up
 */
 
-func (f *Funding) Evaluate(c *ftx.Client) (err error) {
+func (f *Funding) Evaluate(c *ftx.Client, ws *WsAccount) (err error) {
 	switch f.ft {
 	case PAYMENTS:
-		err = EvaluatePayments(f, c)
+		err = EvaluatePayments(f, c, ws)
 	case POSITIONS:
-		err = EvaluatePositions(f, c)
+		err = EvaluatePositions(f, c, ws)
 	}
 
 	return err
 }
 
-func EvaluatePayments(f *Funding, c *ftx.Client) error {
+func EvaluatePayments(f *Funding, c *ftx.Client, ws *WsAccount) error {
 	now := time.Now().Unix()
 	if len(f.Ticker) == 0 {
 		fp, err := c.GetFundingPayments("", now-f.Time, now)
 		if err != nil {
 			return err
 		}
-		err = PrintFundingPayments(f.Summarize, fp)
+		if f.Summarize {
+			if ws == nil {
+				fmt.Print("Funding rate payed: ")
+			} else {
+				ws.AddToBuffer("Funding rate payed:\t")
+			}
+			var sum float64
+			for _, v := range fp {
+				sum += v.Payment
+			}
+			if ws == nil {
+				fmt.Println("\t", sum)
+			} else {
+				ws.Write(fmt.Sprintf("\t %f", sum))
+			}
+			return nil
+		}
+
+		for _, vv := range fp {
+			if ws == nil {
+				fmt.Println(vv.Future, vv.Time.Format("02.07.06 15"), vv.Payment)
+			} else {
+				ws.Write(fmt.Sprintf("%s %s %f", vv.Future, vv.Time.Format("02.07.06 15"), vv.Payment))
+			}
+		}
+
 		return err
 	}
 
@@ -104,12 +130,12 @@ func EvaluatePayments(f *Funding, c *ftx.Client) error {
 
 		fpr = append(fpr, fp)
 	}
-	err := PrintFundingPayments(f.Summarize, fpr...)
-	return err
+	PrintFundingPayments(f.Summarize, ws, fpr...)
+	return nil
 
 }
 
-func EvaluatePositions(f *Funding, c *ftx.Client) error {
+func EvaluatePositions(f *Funding, c *ftx.Client, ws *WsAccount) error {
 	p, err := c.GetPosition()
 	if err != nil {
 		return err
@@ -128,40 +154,49 @@ func EvaluatePositions(f *Funding, c *ftx.Client) error {
 		}
 	}
 
-	err = EvaluatePayments(f, c)
+	err = EvaluatePayments(f, c, ws)
 
 	return err
 }
 
 // PRINT THE FUNCTIONS
-func PrintFundingPayments(summarize bool, fp ...[]ftx.FundingPayments) error {
-	//printfr := make([][]ftx.FundingPayments, 0)
-	TimePosition := make(map[time.Time][]ftx.FundingPayments)
+func PrintFundingPayments(summarize bool, ws *WsAccount, fp ...[]ftx.FundingPayments) {
+	var msg []byte
+	if summarize {
+		ff := make([]float64, len(fp))
+
+		if ws == nil {
+			fmt.Print("Ticker: \t")
+			for _, v := range fp {
+				fmt.Print(v[0].Future, " ")
+			}
+			fmt.Print("\nSummarized\t")
+		} else {
+			msg = append(msg, []byte("Ticker: \t")...)
+			for _, v := range fp {
+				msg = append(msg, []byte(v[0].Future+" ")...)
+			}
+			msg = append(msg, []byte("\nSummarized\t")...)
+		}
+
+		for i, v := range fp {
+			for _, vv := range v {
+				ff[i] = ff[i] + vv.Payment
+			}
+		}
+
+		for _, v := range ff {
+			ss := fmt.Sprintf("%.4f", float64(v))
+			fmt.Print(ss, "\t")
+		}
+		return
+	}
 
 	for _, v := range fp {
+		fmt.Println("Ticker: \t", v[0].Future)
 		for _, vv := range v {
-			r, ok := TimePosition[vv.Time]
-			if !ok {
-				TimePosition[vv.Time] = []ftx.FundingPayments{vv}
-			} else {
-				TimePosition[vv.Time] = append(r, vv)
-			}
+			fmt.Println(vv.Time.Format("02.07.06 15"), vv.Payment)
 		}
 	}
 
-	/*
-		Perp list [btc-perp, eth-perp, xrp-perp]
-		inputs sortiert werden reingeschickt und mit perp list verglichen
-		output is ftx.Fundingpayments array wenn nicht vorhanden ist der wert nil
-	*/
-
-	return nil
-}
-
-type FundingPaymentArray []ftx.FundingPayments
-
-func (a FundingPaymentArray) Len() int      { return len(a) }
-func (a FundingPaymentArray) Swap(i, j int) { a[i], a[j] = a[j], a[i] }
-func (a FundingPaymentArray) Less(i, j int) bool {
-	return a[i].Future[0] < a[j].Future[0]
 }

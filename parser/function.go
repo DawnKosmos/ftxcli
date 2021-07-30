@@ -6,10 +6,10 @@ import (
 )
 
 type Func struct {
-	Name               string
-	NumberOfParameters int
-	ParameterPosition  []int
-	FunctionTokens     []Token
+	Name               string  //Name of the Variable the function is assigned too
+	NumberOfParameters int     //Number of Parameters the functions has
+	ParameterPosition  []int   //position where the Parameter exist
+	FunctionTokens     []Token //Unparsed TokenList, which the parameter get inserted and afterwards parsed
 }
 
 func ParseFunc(v interface{}, tl []Token) ([]Token, error) {

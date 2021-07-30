@@ -76,7 +76,7 @@ func parseDuration(ss string) (int64, error) {
 	return int64(n), nil
 }
 
-func (f *FundingRates) Evaluate(c *ftx.Client) (err error) {
+func (f *FundingRates) Evaluate(c *ftx.Client, ws *WsAccount) (err error) {
 	t := time.Now().Unix()
 	if len(f.Ticker) == 0 {
 		fp, err := c.GetFundingRates("", t, t)

@@ -6,10 +6,12 @@ import (
 	"io/ioutil"
 	"net/http"
 	"os"
+	"strconv"
 	"strings"
 
 	"github.com/DawnKosmos/ftxcmd/ftx"
 	"github.com/DawnKosmos/ftxcmd/parser"
+	"github.com/gorilla/websocket"
 )
 
 func Start(e ...interface{}) {
@@ -27,8 +29,11 @@ ReadAcc:
 	s := strings.Split(string(data), " ")
 	c := &http.Client{}
 
-	fmt.Println(s)
-	f := ftx.NewClient(c, s[1], s[2], "")
+	if s[0] == "main" {
+		s[0] = ""
+	}
+
+	f := ftx.NewClient(c, s[1], s[2], s[0])
 	a, err := f.GetAccount()
 	if err != nil {
 		fmt.Println("Account Verification failed", err)
@@ -46,7 +51,7 @@ ReadAcc:
 			fmt.Println(err)
 			continue
 		}
-		p, err := parser.Parse(t)
+		p, err := parser.Parse(t, nil)
 		if p == nil {
 			if err != nil {
 				fmt.Println(err)
@@ -56,7 +61,7 @@ ReadAcc:
 			continue
 		}
 
-		err = p.Evaluate(f)
+		err = p.Evaluate(f, nil)
 		if err != nil {
 			fmt.Println(err)
 			continue
@@ -64,4 +69,48 @@ ReadAcc:
 		fmt.Println("SUCCESS")
 	}
 
+}
+
+func WsStart(wsc *websocket.Conn, name, public, secret string) {
+
+	f := ftx.NewClient(&http.Client{}, public, secret, name)
+	a, err := f.GetAccount()
+	if err != nil {
+		wsc.WriteMessage(1, []byte("Account Verification failed"))
+		return
+	}
+
+	ws := parser.NewWsAccount(wsc, f)
+
+	b := strconv.Itoa(int(a.TotalAccountValue))
+	wsc.WriteMessage(1, []byte(a.Username+" Account Value: "+b+" Amount of Positions: "+strconv.Itoa(len(a.Positions))))
+
+	for {
+		_, msg, err := wsc.ReadMessage()
+		if err != nil {
+			fmt.Println(err)
+		}
+
+		t, err := parser.Lexer(string(msg))
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		p, err := parser.Parse(t, ws)
+		if p == nil {
+			if err != nil {
+				fmt.Println(err)
+				continue
+			}
+			ws.Write("Variable assigned: " + t[0].Text)
+			continue
+		}
+
+		err = p.Evaluate(f, ws)
+		if err != nil {
+			ws.Write(err.Error())
+			continue
+		}
+		fmt.Println("SUCCESS")
+	}
 }
