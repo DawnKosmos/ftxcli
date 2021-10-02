@@ -27,7 +27,7 @@ type WsAccount struct {
 }
 
 func NewWsAccount(ws *websocket.Conn, account *ftx.Client) *WsAccount {
-	return &WsAccount{ws: ws, account: account, vl: make(map[string]Variable), buffer: make([]byte, 5)}
+	return &WsAccount{ws: ws, account: account, vl: make(map[string]Variable), buffer: []byte{}}
 }
 
 func (w *WsAccount) Write(s string) {

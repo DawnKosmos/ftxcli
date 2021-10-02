@@ -91,6 +91,7 @@ func WsStart(wsc *websocket.Conn, name, public, secret string) {
 			ws.Write(err.Error())
 			continue
 		}
+		wsc.WriteMessage(1, msg)
 
 		t, err := parser.Lexer(string(msg))
 		if err != nil {

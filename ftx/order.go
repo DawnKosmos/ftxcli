@@ -157,7 +157,7 @@ func (f *Client) DeleteOrders(market string, conditionalOnly, limitOnly bool) (R
 		LimitOnly:       limitOnly,
 	})
 	if err != nil {
-		log.Printf("Error PlaceOrder %v", err)
+		log.Printf("Error Delete Orders  %v", err)
 		return resp, err
 	}
 	respRequest, err := f.delete("orders", requestBody)
@@ -168,4 +168,31 @@ func (f *Client) DeleteOrders(market string, conditionalOnly, limitOnly bool) (R
 	}
 	err = processResponse(respRequest, &resp)
 	return resp, err
+}
+
+func (f *Client) CancelOrders(market string, Side string, trigger bool) error {
+	var resp Response
+	requestBody, err := json.Marshal(Corder{
+		Market:               market,
+		Side:                 Side,
+		ConditionlOrdersOnly: trigger,
+	})
+	if err != nil {
+		log.Printf("Error Delete Orders  %v", err)
+		return err
+	}
+	respRequest, err := f.delete("orders", requestBody)
+
+	if err != nil {
+		log.Printf("Error Delete Orders %v", err)
+		return err
+	}
+	err = processResponse(respRequest, &resp)
+	return err
+}
+
+type Corder struct {
+	Market               string `json:"market,omitempty"`
+	Side                 string `json:"side,omitempty"`
+	ConditionlOrdersOnly bool   `json:"conditionlOrdersOnly,omitempty"`
 }

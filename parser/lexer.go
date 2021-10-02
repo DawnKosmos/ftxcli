@@ -73,7 +73,6 @@ type Token struct {
 func Lexer(inputS string) (t []Token, err error) {
 
 	input := strings.Split(inputS, " ")
-
 	for _, s := range input {
 
 		if len(s) == 0 {
