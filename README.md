@@ -1,3 +1,5 @@
 # ftxcmd
 
-Project abonded, but working on a better version, that supports more exchanges
+A CLE for the FTX platform
+
+Project abonded, because of insolvency of FTX, I am working on a new version that supports other exchanges
